@@ -1,0 +1,1 @@
+import * as oficioRepo from './oficio.repo.js';

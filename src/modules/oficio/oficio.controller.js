@@ -1,0 +1,1 @@
+import * as oficioService from './oficio.service.js';

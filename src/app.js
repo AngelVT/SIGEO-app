@@ -1,10 +1,67 @@
 import express from "express";
 import path from 'path';
+import cookieParser from "cookie-parser";
+import cors from 'cors';
+import morgan from 'morgan';
+
 import { __dirname } from "./path.config.js";
+import { SIGEO_SECRET_COOKIE } from "./config/env.config.js";
+import { apiLimiter, authLimiter } from "./config/limmiter.config.js";
+import { checkDB } from "./config/db.config.js";
+import { setDBDefaults } from "./config/db-values.config.js";
+import helmetMiddleware from "./middlewares/helmet.js";
+import authRoutes from './modules/auth/auth.routes.js';
+import oficioRoutes from './modules/oficio/oficio.routes.js';
+import userRoutes from './modules/users/user.routes.js';
+import * as log from "./utils/log.utils.js";
 
 const app = express();
 
+app.set('trust proxy', 1);
+
+checkDB();
+
+setDBDefaults();
+
+app.use(helmetMiddleware);
+
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+app.use(cookieParser(SIGEO_SECRET_COOKIE));
+
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
+
 app.use('/', express.static(path.join(__dirname, 'resources', 'client')));
+
+app.use("/api", morgan('tiny', {
+    stream: {
+        write: (msg) => {
+            log.consoleApi(msg.trim());
+        }
+    }
+}));
+
+app.use("/auth", morgan('tiny', {
+    stream: {
+        write: (msg) => {
+            log.consoleAuth(msg.trim());
+        }
+    }
+}));
+
+app.use('/auth', authLimiter);
+
+app.use('/auth', authRoutes);
+
+app.use("/api", apiLimiter);
+
+app.use('/api/oficio', oficioRoutes);
+
+app.use('/api/router', userRoutes);
 
 app.use((req, res) => {
     res.status(404).json({
