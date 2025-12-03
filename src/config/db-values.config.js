@@ -1,5 +1,10 @@
 import { pool } from "./db.config.js";
 import * as log from '../utils/log.utils.js';
+import { User } from "../modules/users/models/user.model.js";
+import { Group } from "../modules/users/models/groups.model.js";
+import { Role } from "../modules/users/models/role.model.js";
+import { Permission } from "../modules/users/models/permissions.model.js";
+import { UserPermissions } from "../modules/users/models/user-permission.model.js";
 
 const createSchemas = async () => {
     try {
@@ -12,6 +17,68 @@ const createSchemas = async () => {
     }
 }
 
+const setDefaultGroups = async () => {
+    try {
+        const count = await Group.count();
+
+        if (count > 0) return;
+
+        // TODO set default groups
+        //setTimeout(() => { }, 200)
+
+        log.consoleInfo("Default groups have been set");
+    } catch (error) {
+        log.consoleError(`Error establishing default user groups`);
+    }
+}
+
+const setDefaultRoles = async () => {
+    try {
+        const count = await Role.count();
+
+        if (count > 0) return;
+
+        // TODO set default roles
+        //setTimeout(() => { }, 600)
+
+        log.consoleInfo("Default roles have been set");
+    } catch (error) {
+        log.consoleError(`Error establishing default user roles`);
+    }
+}
+
+const setDefaultPermissions = async () => {
+    try {
+        const count = await Permission.count();
+
+        if (count > 0) return;
+
+        // TODO set default roles
+        //setTimeout(() => { }, 450)
+
+        log.consoleInfo("Default permissions have been set");
+    } catch (error) {
+        log.consoleError(`Error establishing default user permissions`);
+    }
+}
+
+const syncModels = async () => {
+    try {
+        await Role.sync();
+        await Group.sync();
+        await Permission.sync();
+        await User.sync();
+        await UserPermissions.sync();
+        log.consoleInfo("Models synced successfully.")
+    } catch (error) {
+        log.consoleError('Error syncing models.');
+    }
+}
+
 export const setDBDefaults = async () => {
-    createSchemas();
+    await createSchemas();
+    await syncModels();
+    setDefaultGroups();
+    setDefaultRoles();
+    setDefaultPermissions();
 }
