@@ -4,9 +4,10 @@ import cookieParser from "cookie-parser";
 import cors from 'cors';
 import morgan from 'morgan';
 
-import { __dirname } from "./path.config.js";
+import { __dirname, __dirstorage } from "./path.config.js";
 import { SIGEO_SECRET_COOKIE } from "./config/env.config.js";
 import { apiLimiter, authLimiter } from "./config/limmiter.config.js";
+import { setDefaultDirectories } from "./config/storage.config.js";
 import { checkDB } from "./config/db.config.js";
 import { setDBDefaults } from "./config/db-values.config.js";
 import helmetMiddleware from "./middlewares/helmet.js";
@@ -22,6 +23,7 @@ app.set('trust proxy', 1);
 checkDB();
 
 setDBDefaults();
+setDefaultDirectories();
 
 app.use(helmetMiddleware);
 
@@ -36,6 +38,7 @@ app.use(cors({
 }));
 
 app.use('/', express.static(path.join(__dirname, 'resources', 'client')));
+app.use('/oficios', express.static(path.join(__dirstorage, 'oficios')));
 
 app.use("/api", morgan('tiny', {
     stream: {

@@ -12,6 +12,11 @@ export const Group = pool.define(
         type: DataTypes.STRING(45),
         allowNull: false,
         unique: true
+    },
+    group_name: {
+        type: DataTypes.STRING(45),
+        allowNull: false,
+        unique: true
     }
 }, {
     timestamps: false,

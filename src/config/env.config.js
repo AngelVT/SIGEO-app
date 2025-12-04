@@ -8,5 +8,7 @@ export const {
     SIGEO_DB_HOST,
     SIGEO_DB_PORT,
     SIGEO_DB_DIALECT,
-    SIGEO_DB_TIMEZONE
+    SIGEO_DB_TIMEZONE,
+    SIGEO_DB_INIT,
+    SIGEO_STORAGE_DIR
 } = process.env;
