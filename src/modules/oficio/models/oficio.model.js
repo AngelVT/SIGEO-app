@@ -39,7 +39,12 @@ Oficio.addHook('afterFind', async (result) => {
     const process = async (oficio) => {
         const statuses = [];
 
-        if (oficio.accomplished) {
+        const { group } = await oficio.getGroup({raw: true});
+        const { accomplished, deadline, oficio_invoice } = oficio;
+        
+        oficio.setDataValue("file", `/oficios/${group}/${oficio_invoice}.pdf`);
+
+        if (accomplished) {
             statuses.push("atendido");
             oficio.setDataValue("status", statuses);
             return;
@@ -48,7 +53,7 @@ Oficio.addHook('afterFind', async (result) => {
         const normalize = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
         const today = normalize(new Date());
-        const dl = normalize(new Date(oficio.deadline));
+        const dl = normalize(new Date(deadline));
 
         const diff = Math.floor((dl - today) / (1000 * 60 * 60 * 24));
 
