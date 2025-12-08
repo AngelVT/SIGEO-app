@@ -14,7 +14,7 @@ export const Group = pool.define(
         unique: true
     },
     group_name: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING(60),
         allowNull: false,
         unique: true
     }

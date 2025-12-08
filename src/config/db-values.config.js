@@ -40,33 +40,45 @@ const applyAssociations = () => {
     Oficio.belongsTo(Group, { foreignKey: 'group_id' });
 };
 
-const setDefaultGroups = async () => {
-    try {
-        const count = await Group.count();
-
-        if (count > 0) return;
-
-        // TODO set default groups
-        //setTimeout(() => { }, 200)
-
-        log.consoleInfo("Default groups have been set");
-    } catch (error) {
-        log.consoleError(`Error establishing default user groups`);
-    }
-}
-
 const setDefaultRoles = async () => {
     try {
         const count = await Role.count();
 
         if (count > 0) return;
 
-        // TODO set default roles
-        //setTimeout(() => { }, 600)
+        await Promise.all([
+            Role.create({ role_id: 1, role: 'system'}),
+            Role.create({ role_id: 2, role: 'admin'}),
+            Role.create({ role_id: 3, role: 'moderator'}),
+            Role.create({ role_id: 4, role: 'user'})
+        ]);
 
         log.consoleInfo("Default roles have been set");
     } catch (error) {
         log.consoleError(`Error establishing default user roles`);
+    }
+}
+
+const setDefaultGroups = async () => {
+    try {
+        const count = await Group.count();
+
+        if (count > 0) return;
+
+        await Promise.all([
+            Group.create({ group_id: 1, group: 'SYSTEM', group_name: "Sistema SIGEO"}),
+            Group.create({ group_id: 2, group: 'DG', group_name: "Dirección General"}),
+            Group.create({ group_id: 3, group: 'DLCU', group_name: "Dirección de Licencias y Control Urbano"}),
+            Group.create({ group_id: 4, group: 'DIPE', group_name: "Dirección de Investigación y Planeación Estratégica"}),
+            Group.create({ group_id: 5, group: 'OIC', group_name: "Órgano Interno de Control "}),
+            Group.create({ group_id: 6, group: 'DAJ', group_name: "Dirección de Asuntos Jurídico"}),
+            Group.create({ group_id: 7, group: 'DFA', group_name: "Dirección de Finanzas y Administración"})
+        ]);
+
+        log.consoleInfo("Default groups have been set");
+    } catch (error) {
+        console.log(error)
+        log.consoleError(`Error establishing default user groups`);
     }
 }
 
@@ -76,8 +88,19 @@ const setDefaultPermissions = async () => {
 
         if (count > 0) return;
 
-        // TODO set default roles
-        //setTimeout(() => { }, 450)
+        await Promise.all([
+            Permission.create({permission_id: 1, permission: "user:manage"}),
+            Permission.create({permission_id: 2, permission: "user:read"}),
+            Permission.create({permission_id: 3, permission: "user:create"}),
+            Permission.create({permission_id: 4, permission: "user:update"}),
+            Permission.create({permission_id: 5, permission: "user:delete"}),
+            Permission.create({permission_id: 6, permission: "oficio:manage"}),
+            Permission.create({permission_id: 7, permission: "oficio:read"}),
+            Permission.create({permission_id: 8, permission: "oficio:create"}),
+            Permission.create({permission_id: 9, permission: "oficio:update"}),
+            Permission.create({permission_id: 10, permission: "oficio:delete"}),
+            Permission.create({permission_id: 11, permission: "oficio:comment"}),
+        ]);
 
         log.consoleInfo("Default permissions have been set");
     } catch (error) {

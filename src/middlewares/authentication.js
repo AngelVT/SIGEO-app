@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { SIGEO_SECRET_JWT } from '../config/env.config.js';
+import { findUserForAuthIdUsername } from '../modules/auth/auth.repo.js';
 
 export function verifyToken(options = {
     blockAccess: true,
@@ -26,26 +27,36 @@ export function verifyToken(options = {
 
         let decoded;
         try {
-            decoded = jwt.verify(clientToken, MV_SECRET_JWT, { algorithms: ['HS256'] });
+            decoded = jwt.verify(clientToken, SIGEO_SECRET_JWT, { algorithms: ['HS256'] });
         } catch (error) {
-            if (redirect) {
+            if (options.redirect) {
                 return res.redirect('/');
             }
             return res.status(401).json({ msg: 'Token verification failed' });
         }
 
-        // TODO verify token content
+        const { user_uuid, username } = decoded;
 
-        // TODO use token info to get the complete user information from the DB
-        const user = 'DB'
+        if (!user_uuid || !username) {
+            return res.status(401).json({ msg: 'Invalid token provided' });
+        }
+
+        const user = await findUserForAuthIdUsername(user_uuid, username);
 
         if (!user) {
             return res.status(401).json({ msg: 'Invalid token provided' });
         }
 
-        // TODO append user information to the req object
         req.user = {
-            
+            user_id: user.user_id,
+            name: user.name,
+            username: user.username,
+            role_id: user.role_id,
+            role: user.role.role,
+            group_id: user.group_id,
+            group: user.group.group,
+            permission_ids: user.permissions.map(p => p.UserPermissions.permission_id),
+            permission_ids: user.permissions.map(p => p.permission),
         };
 
         next();

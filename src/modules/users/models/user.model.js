@@ -13,6 +13,11 @@ export const User = pool.define(
             defaultValue: DataTypes.UUIDV4,
             unique: true
         },
+        name: {
+            type: DataTypes.STRING(45),
+            allowNull: false,
+            unique: true
+        },
         username: {
             type: DataTypes.STRING(45),
             allowNull: false,

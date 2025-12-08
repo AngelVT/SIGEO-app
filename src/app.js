@@ -64,7 +64,7 @@ app.use("/api", apiLimiter);
 
 app.use('/api/oficio', oficioRoutes);
 
-app.use('/api/router', userRoutes);
+app.use('/api/user', userRoutes);
 
 app.use((req, res) => {
     res.status(404).json({
