@@ -1,13 +1,35 @@
 import { Router } from "express";
 import * as userControl from './user.controller.js';
-import { verifyToken } from "../../middlewares/authentication.js";
+import { verifyToken, verifyGroup, verifyRole, verifyPermission } from "../../middlewares/authentication.js";
 
 const router = Router();
 
-router.get('/', verifyToken(), userControl.getAllUsers);
+router.get('/', [
+    verifyToken(),
+    verifyGroup(['SYSTEM']),
+    verifyRole(['system']),
+    verifyPermission(['user:read','user:manage'])
+], userControl.getAllUsers);
 
-router.get('/:user_id', verifyToken(), userControl.getSingleUser);
+router.get('/:user_id', [
+    verifyToken(),
+    verifyGroup(['SYSTEM']),
+    verifyRole(['system']),
+    verifyPermission(['user:read','user:manage'])
+], userControl.getSingleUser);
 
-router.post('/', userControl.createUser);
+router.post('/', [
+    verifyToken(),
+    verifyGroup(['SYSTEM']),
+    verifyRole(['system']),
+    verifyPermission(['user:create','user:manage'])
+], userControl.createUser);
+
+router.patch('/:user_id', [
+    verifyToken(),
+    verifyGroup(['SYSTEM']),
+    verifyRole(['system']),
+    verifyPermission(['user:update','user:manage'])
+], userControl.updateUser);
 
 export default router;

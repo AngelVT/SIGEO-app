@@ -1,7 +1,7 @@
 import * as authService from './auth.service.js';
 import { requestHandler } from '../../utils/request.utils.js';
 
-const COOKIE_EXP = 43200000
+const COOKIE_EXP = 43200000;
 
 export const login = requestHandler(async (req, res) => {
     const { username, password } = req.body;

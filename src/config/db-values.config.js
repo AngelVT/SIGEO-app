@@ -6,6 +6,7 @@ import { Role } from "../modules/users/models/role.model.js";
 import { Permission } from "../modules/users/models/permissions.model.js";
 import { UserPermissions } from "../modules/users/models/user-permission.model.js";
 import { Oficio } from "../modules/oficio/models/oficio.model.js";
+import { OficioEmitted } from "../modules/oficio/models/emitted-oficio.model.js";
 import { Comment } from "../modules/oficio/models/comment.model.js";
 import { SIGEO_DB_INIT } from "./env.config.js";
 
@@ -38,26 +39,10 @@ const applyAssociations = () => {
     
     Oficio.hasMany(Comment, { foreignKey: 'oficio_id' });
     Oficio.belongsTo(Group, { foreignKey: 'group_id' });
+
+    Oficio.hasOne(OficioEmitted, { foreignKey: 'oficio_id' });
+    OficioEmitted.belongsTo(Oficio, { foreignKey: 'oficio_id' });
 };
-
-const setDefaultRoles = async () => {
-    try {
-        const count = await Role.count();
-
-        if (count > 0) return;
-
-        await Promise.all([
-            Role.create({ role_id: 1, role: 'system'}),
-            Role.create({ role_id: 2, role: 'admin'}),
-            Role.create({ role_id: 3, role: 'moderator'}),
-            Role.create({ role_id: 4, role: 'user'})
-        ]);
-
-        log.consoleInfo("Default roles have been set");
-    } catch (error) {
-        log.consoleError(`Error establishing default user roles`);
-    }
-}
 
 const setDefaultGroups = async () => {
     try {
@@ -82,6 +67,25 @@ const setDefaultGroups = async () => {
     }
 }
 
+const setDefaultRoles = async () => {
+    try {
+        const count = await Role.count();
+
+        if (count > 0) return;
+
+        await Promise.all([
+            Role.create({ role_id: 1, role: 'system'}),
+            Role.create({ role_id: 2, role: 'admin'}),
+            Role.create({ role_id: 3, role: 'moderator'}),
+            Role.create({ role_id: 4, role: 'user'})
+        ]);
+
+        log.consoleInfo("Default roles have been set");
+    } catch (error) {
+        log.consoleError(`Error establishing default user roles`);
+    }
+}
+
 const setDefaultPermissions = async () => {
     try {
         const count = await Permission.count();
@@ -98,8 +102,9 @@ const setDefaultPermissions = async () => {
             Permission.create({permission_id: 7, permission: "oficio:read"}),
             Permission.create({permission_id: 8, permission: "oficio:create"}),
             Permission.create({permission_id: 9, permission: "oficio:update"}),
-            Permission.create({permission_id: 10, permission: "oficio:delete"}),
-            Permission.create({permission_id: 11, permission: "oficio:comment"}),
+            Permission.create({permission_id: 10, permission: "oficio:close"}),
+            Permission.create({permission_id: 11, permission: "oficio:delete"}),
+            Permission.create({permission_id: 12, permission: "oficio:comment"}),
         ]);
 
         log.consoleInfo("Default permissions have been set");

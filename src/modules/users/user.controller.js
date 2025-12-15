@@ -28,3 +28,14 @@ export const createUser = requestHandler(async (req, res) => {
 
     console.log("Create request completed, new user created");
 });
+
+export const updateUser = requestHandler(async (req, res) => {
+    const { name, password, group, role, permissions } = req.body;
+    const { user_id } = req.params;
+
+    const response = await userService.requestUserUpdate(user_id, name, password, group, role, permissions);
+
+    res.status(200).json(response);
+
+    console.log("Post request completed, user updated");
+});

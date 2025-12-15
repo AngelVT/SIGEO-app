@@ -15,6 +15,7 @@ import authRoutes from './modules/auth/auth.routes.js';
 import oficioRoutes from './modules/oficio/oficio.routes.js';
 import userRoutes from './modules/users/user.routes.js';
 import * as log from "./utils/log.utils.js";
+import { verifyToken } from "./middlewares/authentication.js";
 
 const app = express();
 
@@ -37,7 +38,10 @@ app.use(cors({
     credentials: true
 }));
 
-app.use('/', express.static(path.join(__dirname, 'resources', 'client')));
+app.use('/', express.static(path.join(__dirname, 'resources', 'client', 'login')));
+
+app.use('/dashboard', verifyToken(), express.static(path.join(__dirname, 'resources', 'client', 'dash')));
+
 app.use('/oficios', express.static(path.join(__dirstorage, 'oficios')));
 
 app.use("/api", morgan('tiny', {

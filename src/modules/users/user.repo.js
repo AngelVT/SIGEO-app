@@ -58,6 +58,33 @@ export async function saveNewUser(name, username, password, role_id, group_id, p
     return created ? generateSafeUser(new_user) : null;
 }
 
+export async function updateUser(user_uuid, name, password, group, role, permissions) {
+    const user = await User.findOne({
+        where: {
+            user_uuid
+        }
+    });
+
+    if (!user) return null;
+
+    await user.update({
+        name,
+        password,
+        group,
+        role
+    });
+
+    if (permissions) {
+        await user.setPermissions(permissions);
+    }
+
+    await user.reload({
+        include: USER_MODELS
+    });
+
+    return generateSafeUser(user);
+}
+
 function generateSafeUser(user) {
     const { user_id, password, ...safeUser } = user.toJSON();
     return safeUser;

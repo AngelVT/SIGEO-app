@@ -3,6 +3,7 @@ import { validate as isUuid } from 'uuid';
 import ValidationError from '../../errors/validationError.js';
 import ResourceError from '../../errors/ResourceError.js';
 import { hash } from 'bcrypt';
+import * as acValidations from '../../utils/access-control.utils.js';
 
 export async function requestAllUsers() {
     const users = await userRepo.findAllUsers();
@@ -39,6 +40,18 @@ export async function requestUserCreation(name, username, password, group, role,
 
     const hashedPassword = await hash(password, 10);
 
+    if (!acValidations.validateGroup(group)) {
+        throw new ValidationError("Solicitud fallida debido a grupo invalido");
+    }
+
+    if (!acValidations.validateRole(role)) {
+        throw new ValidationError("Solicitud fallida debido a rol invalido.");
+    }
+
+    if (!acValidations.validatePermissions(permissions)) {
+        throw new ValidationError("Solicitud fallida debido a permisos inválidos");
+    }
+
     const newUser = await userRepo.saveNewUser(name, username, hashedPassword, role, group, permissions);
 
     if (!newUser) {
@@ -47,5 +60,43 @@ export async function requestUserCreation(name, username, password, group, role,
 
     return {
         user: newUser
+    }
+}
+
+export async function requestUserUpdate(user_id, name, password, group, role, permissions) {
+    if (!isUuid(user_id)) {
+        throw new ValidationError('Solicitud fallida debido a identificador invalido.');
+    }
+
+    if (!name && !password && !group && !role && !permissions) {
+        throw new ValidationError("Solicitud fallida debido a información faltante.");
+    }
+
+    let hashedPassword;
+
+    if(password) {
+        hashedPassword = await hash(password, 10)
+    }
+
+    if (group && !acValidations.validateGroup(group)) {
+        throw new ValidationError("Solicitud fallida debido a grupo invalido");
+    }
+
+    if (role && !acValidations.validateRole(role)) {
+        throw new ValidationError("Solicitud fallida debido a rol invalido.");
+    }
+
+    if (permissions && !acValidations.validatePermissions(permissions)) {
+        throw new ValidationError("Solicitud fallida debido a permisos inválidos");
+    }
+
+    const user = await userRepo.updateUser(user_id, name, hashedPassword, group, role, permissions);
+
+    if (!user) {
+        throw new ValidationError(`El usuario no existe.`);
+    }
+
+    return {
+        user
     }
 }
