@@ -50,6 +50,12 @@ export const OficioEmitted = pool.define(
             type: DataTypes.BOOLEAN,
             defaultValue: false,
             allowNull: false
+        },
+        file: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `/oficios/emitidos/${this.emitted_of_invoice}.pdf`
+            }
         }
     },
     {
