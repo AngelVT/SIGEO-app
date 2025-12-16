@@ -404,7 +404,7 @@ export async function requestEmittedOficioCreation(emission_date, name, position
             if (file) {
                 file.originalname = `${emitted_of_invoice}.pdf`
 
-                filePath = await saveFile(`emitidos`, file);
+                filePath = await saveFile(`oficios/emitidos`, file);
             }
 
             return emittedOficioRecord;
@@ -500,7 +500,7 @@ export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date,
             if (file) {
                 file.originalname = `${emitted_of_invoice}.pdf`
 
-                filePath = await saveFile(`emitidos`, file);
+                filePath = await saveFile(`oficios/emitidos`, file);
             }
 
             return emittedOficioRecord;
