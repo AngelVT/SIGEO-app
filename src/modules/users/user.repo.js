@@ -70,8 +70,8 @@ export async function updateUser(user_uuid, name, password, group, role, permiss
     await user.update({
         name,
         password,
-        group,
-        role
+        group_id: group,
+        role_id: role
     });
 
     if (permissions) {

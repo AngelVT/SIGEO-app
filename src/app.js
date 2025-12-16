@@ -28,8 +28,8 @@ setDefaultDirectories();
 
 app.use(helmetMiddleware);
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '3mb' }));
+app.use(express.urlencoded({ limit: '3mb', extended: true }));
 
 app.use(cookieParser(SIGEO_SECRET_COOKIE));
 

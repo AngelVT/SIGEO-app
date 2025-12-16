@@ -9,7 +9,7 @@ export async function validateGroup(group_id) {
 
     if (!group) return false;
 
-    return true;
+    return group.group;
 }
 
 export async function validateRole(role_id) {

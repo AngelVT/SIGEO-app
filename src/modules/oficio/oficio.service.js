@@ -4,7 +4,10 @@ import ValidationError from '../../errors/validationError.js';
 import ResourceError from '../../errors/ResourceError.js';
 import * as oficioUtils from './oficio.utils.js';
 import { validateGroup } from '../../utils/access-control.utils.js';
-import { validateDate, parseBool } from '../../utils/data.utils.js';
+import { validateDate, parseBool, validatePFFile, saveFile, removeFile } from '../../utils/data.utils.js';
+import { pool } from '../../config/db.config.js';
+import { consoleError, consoleInfo } from '../../utils/log.utils.js';
+import FileSystemError from '../../errors/FileSystemError.js';
 
 //Oficio services
 export async function requestAllPendingOficios() {
@@ -55,7 +58,7 @@ export async function requestGroupOficio(oficio_uuid, group_id) {
     const oficio = await oficioRepo.findGroupOficio(oficio_uuid, group_id);
 
     if(!oficio) {
-        throw new ResourceError("El oficio solicitado no existe.")
+        throw new ResourceError("El oficio solicitado no existe o no tienes los permisos para verlo.")
     }
 
     return {
@@ -111,8 +114,8 @@ export async function requestGroupUnansweredOficios(userGroup) {
     }
 }
 
-export async function requestOficioCreation(true_invoice, name, subject, reception_date, deadline, group, response_required) {
-    if (!true_invoice || !name || !subject || !reception_date || !deadline || !group || typeof response_required === 'undefined') {
+export async function requestOficioCreation(true_invoice, name, subject, reception_date, deadline, group, response_required, file) {
+    if (!true_invoice || !name || !subject || !reception_date || !deadline || !group || typeof response_required === 'undefined' || !file) {
         throw new ValidationError("No se pudo crear el oficio debido a información faltante.");
     }
 
@@ -122,13 +125,9 @@ export async function requestOficioCreation(true_invoice, name, subject, recepti
         throw new ValidationError("Solicitud invalidad debido a datos inválidos, comprueba tu información e intenta de nuevo");
     }
 
-    const date = new Date;
+    const groupString = await validateGroup(group);
 
-    const year = date.getFullYear();
-
-    const { oficio_invoice, invoice } = await oficioUtils.generateOficioInvoice(year);
-
-    if (!validateGroup(group)) {
+    if (!groupString) {
         throw new ValidationError("Solicitud fallida debido a que el grupo dado es invalido.");
     }
 
@@ -136,10 +135,47 @@ export async function requestOficioCreation(true_invoice, name, subject, recepti
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
     }
 
-    const oficio = await oficioRepo.createOficio(oficio_invoice, true_invoice, invoice, year, name, subject, reception_date, deadline, group, responseRequired);
+    if(!validatePFFile(file)) {
+        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
+    }
 
-    if(!oficio) {
-        throw new ValidationError(`Solicitud fallida, el folio ${oficio_invoice} ya existe.`);
+    const date = new Date;
+
+    const year = date.getFullYear();
+
+    const { oficio_invoice, invoice } = await oficioUtils.generateOficioInvoice(year);
+
+    let filePath;
+    let oficio;
+
+    try {
+        oficio = await pool.transaction(async transaction => {
+            transaction.afterCommit(() => {
+                consoleInfo(`${oficio_invoice} transaction closed`)
+            });
+
+            const oficioRecord = await oficioRepo.createOficio(oficio_invoice, true_invoice, invoice, year, name, subject, reception_date, deadline, group, responseRequired, transaction);
+
+            if(!oficioRecord) {
+                throw new ValidationError(`Solicitud fallida, el folio ${oficio_invoice} ya existe.`);
+            }
+
+            file.originalname = `${oficio_invoice}.pdf`
+
+            filePath = await saveFile(`oficios/${groupString}`, file);
+
+            return oficioRecord;
+        });
+    } catch (error) {
+        if (filePath) {
+            try {
+                await removeFile(filePath);
+            } catch (error) {
+                consoleError(`CRITICAL: Failed to delete orphaned file ${filePath}: ${error.message}`);
+            }
+        }
+        
+        throw error;
     }
 
     return {
@@ -147,16 +183,16 @@ export async function requestOficioCreation(true_invoice, name, subject, recepti
     }
 }
 
-export async function requestOficioUpdate(oficio_uuid, true_invoice, name, subject, reception_date, deadline, group, response_required) {
+export async function requestOficioUpdate(oficio_uuid, true_invoice, name, subject, reception_date, deadline, response_required, file) {
     if (!isUuid(oficio_uuid)) {
         throw new ValidationError('Solicitud fallida debido a id invalido.');
     }
 
-    if (!true_invoice && !name && !subject && !reception_date && !deadline && !group && typeof response_required === 'undefined') {
+    if (!true_invoice && !name && !subject && !reception_date && !deadline && !group && typeof response_required === 'undefined' && !file) {
         throw new ValidationError("No se pudo actualizar el oficio debido a información faltante.");
     }
 
-    if(typeof response_required !== 'undefined') {
+    if (typeof response_required !== 'undefined') {
         const responseRequired = parseBool(response_required);
 
         if (typeof responseRequired !== 'boolean') {
@@ -164,9 +200,9 @@ export async function requestOficioUpdate(oficio_uuid, true_invoice, name, subje
         }
     }
 
-    if (group && !validateGroup(group)) {
+    /*if (group && !validateGroup(group)) {
         throw new ValidationError("Solicitud fallida debido a que el grupo dado es invalido.");
-    }
+    }*/
 
     if (reception_date && !validateDate(reception_date)) {
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
@@ -176,10 +212,35 @@ export async function requestOficioUpdate(oficio_uuid, true_invoice, name, subje
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
     }
 
-    const oficio = await oficioRepo.updateOficio(oficio_uuid, true_invoice, name, subject, reception_date, deadline, group, response_required);
+    if (file && !validatePFFile(file)) {
+        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
+    }
 
-    if(!oficio) {
-        throw new ValidationError(`Solicitud fallida, el oficio no existe o ya fue cerrado.`);
+    let filePath;
+    let oficio;
+
+    try {
+        oficio = await pool.transaction(async transaction => {
+            const oficioRecord = await oficioRepo.updateOficio(oficio_uuid, true_invoice, name, subject, reception_date, deadline, response_required, transaction);
+
+            if(!oficioRecord) {
+                throw new ValidationError(`Solicitud fallida, el oficio no existe o ya fue cerrado.`);
+            }
+
+            if (file) {
+                file.originalname = `${oficioRecord.oficio_invoice}.pdf`
+
+                filePath = await saveFile(`oficios/${oficioRecord.group.group}`, file);
+            }
+
+            return oficioRecord;
+        });
+    } catch (error) {
+        if (!filePath) {
+            consoleError("File not updated");
+        }
+
+        throw error;
     }
 
     return {
@@ -276,7 +337,7 @@ export async function requestEmittedOficio(uuid) {
     }
 }
 
-export async function requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid) {
+export async function requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file) {
     if (typeof is_response === 'undefined') {
         throw new ValidationError("No se pudo crear el oficio debido a información faltante.");
     }
@@ -291,14 +352,12 @@ export async function requestEmittedOficioCreation(emission_date, name, position
         throw new ValidationError("solicitud fallida debido a que se requiere proporcionar un oficio valido cuando se quiere emitir un oficio de respuesta.");
     }
 
-    const date = new Date;
-
-    const year = date.getFullYear();
-
-    const { emitted_of_invoice, invoice } = await oficioUtils.generateEmittedOficioInvoice(year);
-
     if ((emission_date && !validateDate(emission_date)) || (reception_date && !validateDate(reception_date))) {
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
+    }
+
+    if (file && !validatePFFile(file)) {
+        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
     }
 
     let target_oficio_id;
@@ -325,10 +384,42 @@ export async function requestEmittedOficioCreation(emission_date, name, position
         }
     }
 
-    const emittedOficio = await oficioRepo.createEmittedOficio(emitted_of_invoice, invoice, year, emission_date, name, position, subject, reception_date, isResponse, target_oficio_id);
+    const date = new Date;
 
-    if(!emittedOficio) {
-        throw new ValidationError(`Solicitud fallida, el folio ${emitted_of_invoice} ya existe.`);
+    const year = date.getFullYear();
+
+    const { emitted_of_invoice, invoice } = await oficioUtils.generateEmittedOficioInvoice(year);
+
+    let filePath;
+    let emittedOficio;
+
+    try {
+        emittedOficio = await pool.transaction(async transaction => {
+            const emittedOficioRecord = await oficioRepo.createEmittedOficio(emitted_of_invoice, invoice, year, emission_date, name, position, subject, reception_date, isResponse, target_oficio_id, transaction);
+
+            if(!emittedOficioRecord) {
+                throw new ValidationError(`Solicitud fallida, el folio ${emitted_of_invoice} ya existe.`);
+            }
+
+            if (file) {
+                file.originalname = `${emitted_of_invoice}.pdf`
+
+                filePath = await saveFile(`emitidos`, file);
+            }
+
+            return emittedOficioRecord;
+
+        });
+    } catch (error) {
+        if (filePath) {
+            try {
+                await removeFile(filePath);
+            } catch (error) {
+                consoleError(`CRITICAL: Failed to delete orphaned file ${filePath}: ${error.message}`);
+            }
+        }
+        
+        throw error;
     }
 
     return {
@@ -336,13 +427,25 @@ export async function requestEmittedOficioCreation(emission_date, name, position
     }
 }
 
-export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_uuid) {
+export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file) {
     if (!isUuid(emitted_of_uuid)) {
         throw new ValidationError('Solicitud fallida debido a id invalido.');
     }
 
-    if(!emission_date && !name && !position && !subject && !reception_date && typeof is_response === 'undefined' && !oficio_uuid) {
+    if(!emission_date && !name && !position && !subject && !reception_date && typeof is_response === 'undefined' && !oficio_uuid && !file) {
         throw new ValidationError("No se pudo actualizar el oficio debido a información faltante");
+    }
+
+    if (emission_date && !validateDate(emission_date)) {
+        throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
+    }
+
+    if (reception_date && !validateDate(reception_date)) {
+        throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
+    }
+
+    if (file && !validatePFFile(file)) {
+        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
     }
 
     let isResponse;
@@ -361,14 +464,6 @@ export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date,
         if (isResponse && !isUuid(emitted_of_uuid)) {
             throw new ValidationError("No se pudo actualizar el oficio debido a información invalida");
         }
-    }
-
-    if (emission_date && !validateDate(emission_date)) {
-        throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
-    }
-
-    if (reception_date && !validateDate(reception_date)) {
-        throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
     }
 
     let target_oficio_id;
@@ -391,10 +486,31 @@ export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date,
         }
     }
 
-    const emittedOficio = await oficioRepo.updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, target_oficio_id);
+    let filePath;
+    let emittedOficio;
 
-    if(!emittedOficio) {
-        throw new ValidationError(`Solicitud fallida, el folio solicitado no existe.`);
+    try {
+        emittedOficio = await pool.transaction(async transaction => {
+            const emittedOficioRecord = await oficioRepo.updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, target_oficio_id, transaction);
+
+            if(!emittedOficioRecord) {
+                throw new ValidationError(`Solicitud fallida, el folio solicitado no existe.`);
+            }
+
+            if (file) {
+                file.originalname = `${emitted_of_invoice}.pdf`
+
+                filePath = await saveFile(`emitidos`, file);
+            }
+
+            return emittedOficioRecord;
+        });
+    } catch (error) {
+        if (!filePath) {
+            consoleError("File not updated");
+        }
+
+        throw error;
     }
 
     return {

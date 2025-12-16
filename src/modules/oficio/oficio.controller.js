@@ -71,8 +71,9 @@ export const getUnansweredOficios = requestHandler(async (req, res) => {
 
 export const createOficio = requestHandler(async (req, res) => {
     const { true_invoice, name, subject, reception_date, deadline, group, response_required } = req.body;
+    const file = req.file;
 
-    const response = await oficioService.requestOficioCreation(true_invoice, name, subject, reception_date, deadline, group, response_required);
+    const response = await oficioService.requestOficioCreation(true_invoice, name, subject, reception_date, deadline, group, response_required, file);
 
     res.status(200).json(response);
 
@@ -98,10 +99,11 @@ export const commentOficio = requestHandler(async (req, res) => {
 });
 
 export const updateOficio = requestHandler(async (req, res) => {
-    const { true_invoice, name, subject, reception_date, deadline, group, response_required } = req.body;
+    const { true_invoice, name, subject, reception_date, deadline, response_required } = req.body;
     const { oficio_id } = req.params;
+    const file = req.file;
 
-    const response = await oficioService.requestOficioUpdate(oficio_id, true_invoice, name, subject, reception_date, deadline, group, response_required);
+    const response = await oficioService.requestOficioUpdate(oficio_id, true_invoice, name, subject, reception_date, deadline, response_required, file);
     
     res.status(200).json(response);
 
@@ -141,8 +143,9 @@ export const getEmittedOficio = requestHandler(async (req, res) => {
 
 export const createEmittedOficio = requestHandler(async (req, res) => {
     const { emission_date, name, position, subject, reception_date, is_response, oficio_uuid } = req.body;
+    const file = req.file;
 
-    const response = await oficioService.requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid);
+    const response = await oficioService.requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file);
 
     res.status(200).json(response);
 
@@ -152,8 +155,9 @@ export const createEmittedOficio = requestHandler(async (req, res) => {
 export const updateEmittedOficio = requestHandler(async (req, res) => {
     const { emission_date, name, position, subject, reception_date, is_response, oficio_uuid } = req.body;
     const { emitted_of_uuid } = req.params;
+    const file = req.file;
 
-    const response = await oficioService.requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_uuid)
+    const response = await oficioService.requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file);
     
     res.status(200).json(response);
 

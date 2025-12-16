@@ -78,15 +78,15 @@ export async function requestUserUpdate(user_id, name, password, group, role, pe
         hashedPassword = await hash(password, 10)
     }
 
-    if (group && !acValidations.validateGroup(group)) {
+    if (group && !await acValidations.validateGroup(group)) {
         throw new ValidationError("Solicitud fallida debido a grupo invalido");
     }
 
-    if (role && !acValidations.validateRole(role)) {
+    if (role && !await acValidations.validateRole(role)) {
         throw new ValidationError("Solicitud fallida debido a rol invalido.");
     }
 
-    if (permissions && !acValidations.validatePermissions(permissions)) {
+    if (permissions && !await acValidations.validatePermissions(permissions)) {
         throw new ValidationError("Solicitud fallida debido a permisos inválidos");
     }
 

@@ -152,7 +152,7 @@ export async function findGroupResponsePendingOficios(group_id) {
     });
 }
 
-export async function createOficio(oficio_invoice, true_invoice, invoice, year, name, subject, reception_date, deadline, group_id, response_required) {
+export async function createOficio(oficio_invoice, true_invoice, invoice, year, name, subject, reception_date, deadline, group_id, response_required, transaction) {
     const [newOficio, created] = await Oficio.findOrCreate({
         where: {
             oficio_invoice,
@@ -170,24 +170,27 @@ export async function createOficio(oficio_invoice, true_invoice, invoice, year, 
             deadline,
             group_id,
             response_required
-        }
+        },
+        transaction
     });
 
     if (!created) return null;
 
-    await newOficio.reload({
+    /*await newOficio.reload({
         include: OFICIO_MODELS
-    });
+    });*/
 
     return generateSafeOficio(newOficio);
 }
 
-export async function updateOficio(oficio_uuid, true_invoice, name, subject, reception_date, deadline, group_id, response_required) {
+export async function updateOficio(oficio_uuid, true_invoice, name, subject, reception_date, deadline, response_required, transaction) {
     const oficio = await Oficio.findOne({
         where: {
             oficio_uuid,
             accomplished: false
-        }
+        },
+        include: OFICIO_MODELS,
+        transaction
     });
 
     if (!oficio) return null;
@@ -198,13 +201,12 @@ export async function updateOficio(oficio_uuid, true_invoice, name, subject, rec
         subject,
         reception_date,
         deadline,
-        group_id,
         response_required
     });
 
-    await oficio.reload({
+    /*await oficio.reload({
         include: OFICIO_MODELS
-    });
+    });*/
 
     return generateSafeOficio(oficio)
 }
@@ -363,7 +365,7 @@ export async function findEmittedOficio(emitted_of_uuid) {
     return generateSafeEmittedOficio(oficio);
 }
 
-export async function createEmittedOficio(emitted_of_invoice, invoice, year, emission_date, name, position, subject, reception_date, is_response, oficio_id) {
+export async function createEmittedOficio(emitted_of_invoice, invoice, year, emission_date, name, position, subject, reception_date, is_response, oficio_id, transaction) {
     const [newOficio, created] = await OficioEmitted.findOrCreate({
         where: {
             emitted_of_invoice,
@@ -381,23 +383,26 @@ export async function createEmittedOficio(emitted_of_invoice, invoice, year, emi
             reception_date,
             is_response,
             oficio_id
-        }
+        },
+        transaction
     });
 
     if (!created) return null;
 
-    await newOficio.reload({
+    /*await newOficio.reload({
         include: EMITTED_OFICIO_MODELS
-    })
+    });*/
 
     return generateSafeEmittedOficio(newOficio);
 }
 
-export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_id) {
+export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_id, transaction) {
     const oficio = await OficioEmitted.findOne({
         where: {
             emitted_of_uuid
-        }
+        },
+        include: EMITTED_OFICIO_MODELS,
+        transaction
     });
 
     await oficio.update({
@@ -412,9 +417,9 @@ export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, 
 
     if (!oficio) return null;
 
-    await oficio.reload({
+    /*await oficio.reload({
         include: EMITTED_OFICIO_MODELS
-    })
+    })*/
 
     return generateSafeEmittedOficio(oficio);
 }
