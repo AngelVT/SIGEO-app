@@ -1,3 +1,7 @@
+import { SIGEO_SECRET_JWT } from "../config/env.config.js";
+import { findUserForAuthIdUsername } from '../modules/auth/auth.repo.js';
+import jwt from 'jsonwebtoken';
+
 export function groupRedirect(groups = [], url = '/api') {
     return async function (req, res, next) {
         const userGroup = req.user.group;
@@ -46,6 +50,29 @@ export function groupDelegate(groups = []) {
         }
 
         req.full = false;
+        return next();
+    }
+}
+
+export const loginRedirect = async (req, res, next) => {
+    const clientToken = req.signedCookies.access_token;
+
+    if (!clientToken) return next();
+
+    let decoded;
+    try {
+        decoded = jwt.verify(clientToken, SIGEO_SECRET_JWT, { algorithms: ['HS256'] });
+
+        const { user_uuid, username } = decoded;
+
+        if (!user_uuid || !username) return next();
+
+        const user = await findUserForAuthIdUsername(user_uuid, username);
+
+        if (!user) return next();
+
+        return res.redirect('/dashboard/');
+    } catch (err) {
         return next();
     }
 }

@@ -3,9 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="../libs/bootstrap-icons-1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/navigation.js" defer></script>
+    <script src="js/funtionality.js" defer></script>
+    <title>SIGEO - Dashboard</title>
 </head>
 <body>
-    <h1>The Dashboard</h1>
+    <nav>
+        <h1>SIGEO</h1>
+        <ul class="navigation-links" id="navigation_links">
+            <li class="selected" id="oficios_link">Oficios</li>
+            <li id="emitidos_link">Emitidos</li>
+            <li class="dis-none" id="users_link">Users</li>
+        </ul>
+    </nav>
+    <section class="controls-panel">
+        <div class="control-set" id="oficios-controls">
+            <form id="invoice_search">
+                <input type="number" placeholder="Folio">
+                <select name="group">
+                    <option value="">Seleccionar ...</option>
+                    <option value="2">Dirección General</option>
+                    <option value="3">Dirección de Licencias y Control Urbano</option>
+                    <option value="4">Dirección de Investigación y Planeación Estratégica</option>
+                    <option value="5">Órgano Interno de Control</option>
+                    <option value="6">Dirección de Asuntos Jurídico</option>
+                    <option value="7">Dirección de Finanzas y Administración</option>
+                </select>
+                <select name="year">
+                    <option value="2025" selected>2025</option>
+                </select>
+                <input type="text" name="name" placeholder="Nombre">
+                <input type="text" name="subject" placeholder="Asunto">
+
+                <div>
+                    <label>Completado? <input type="checkbox" name="accomplished"></label>
+
+                    <label>Requiere respuesta? <input type="checkbox" name="response_required"></label>
+                </div>
+
+                <button type="submit">Buscar</button>
+            </form>
+
+            <button class="bi-folder-plus all-button" id="btn_create_oficio"></button>
+
+            <button class="bi-archive all-button" id="btn_all_oficio"></button>
+        </div>
+
+        <div class="control-set dis-none" id="emitidos-controls">
+            <form id="emitido_search">
+                <input type="number" placeholder="Folio">
+                <select name="year">
+                    <option value="2025" selected>2025</option>
+                </select>
+                <input type="text" name="name" placeholder="Nombre">
+                <input type="text" name="subject" placeholder="Asunto">
+                <input type="text" name="position" placeholder="Cargo">
+                <label>Es respuesta? <input type="checkbox" name="response_required"></label>
+
+                <button type="submit">Buscar</button>
+            </form>
+
+            <button class="bi-folder-plus all-button" id="btn_create_emitido"></button>
+
+            <button class="bi-archive all-button" id="btn_all_emitido"></button>
+        </div>
+
+        <div class="control-set dis-none" id="users-controls">
+            <form id="user_search">
+                <input type="text" name="name" placeholder="Nombre">
+                <input type="text" name="username" placeholder="Usuario">
+
+                <select name="group">
+                    <option value="">Seleccionar ... </option>
+                    <option value="1">Sistema SIGEO</option>
+                    <option value="2">Dirección General</option>
+                    <option value="3">Dirección de Licencias y Control Urbano</option>
+                    <option value="4">Dirección de Investigación y Planeación Estratégica</option>
+                    <option value="5">Órgano Interno de Control</option>
+                    <option value="6">Dirección de Asuntos Jurídico</option>
+                    <option value="7">Dirección de Finanzas y Administración</option>
+                </select>
+
+                <select name="role">
+                    <option value="">Seleccionar ... </option>
+                    <option value="1">System</option>
+                    <option value="2">Admin</option>
+                    <option value="3">Moderator</option>
+                    <option value="4">User</option>
+                </select>
+
+                <button type="submit">Buscar</button>
+            </form>
+
+            <button class="bi-person-plus all-button" id="btn_create_user"></button>
+
+            <button class="bi-people all-button" id="btn_all_user"></button>
+        </div>
+
+    </section>
+    <section class="information-panel">
+        <ul class="page-indexes">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+        </ul>
+        <div class="results-container" id="results">
+        </div>
+    </section>
 </body>
 </html>

@@ -29,6 +29,12 @@ export async function requestLogin(username, password) {
     );
 
     return {
-        token
+        token,
+        user: {
+            name: user.name,
+            username: user.username,
+            group: user.group.group,
+            role: user.role.role
+        }
     }
 }

@@ -16,6 +16,7 @@ import oficioRoutes from './modules/oficio/oficio.routes.js';
 import userRoutes from './modules/users/user.routes.js';
 import * as log from "./utils/log.utils.js";
 import { verifyToken } from "./middlewares/authentication.js";
+import { loginRedirect } from "./middlewares/redirections.js";
 
 const app = express();
 
@@ -38,11 +39,17 @@ app.use(cors({
     credentials: true
 }));
 
-app.use('/', express.static(path.join(__dirname, 'resources', 'client', 'login')));
+app.use('/login', loginRedirect, express.static(path.join(__dirname, 'resources', 'client', 'login')));
 
-app.use('/dashboard', verifyToken(), express.static(path.join(__dirname, 'resources', 'client', 'dash')));
+app.use('/libs', express.static(path.join(__dirname, 'resources', 'client', 'libs')));
 
-app.use('/oficios', express.static(path.join(__dirstorage, 'oficios')));
+app.use('/fonts', express.static(path.join(__dirname, 'resources', 'client', 'fonts')));
+
+app.use('/dashboard', verifyToken({
+    redirect: true
+}), express.static(path.join(__dirname, 'resources', 'client', 'dash')));
+
+app.use('/oficios', verifyToken(), express.static(path.join(__dirstorage, 'oficios')));
 
 app.use("/api", morgan('tiny', {
     stream: {
@@ -72,7 +79,8 @@ app.use('/api/user', userRoutes);
 
 app.use((req, res) => {
     res.status(404).json({
-        msg: "404 not found"
+        msg: "404 not found",
+        url: '/login'
     })
 });
 

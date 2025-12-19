@@ -1,0 +1,93 @@
+:root {
+    --primary: #832339;
+    --secondary: #998454;
+    --complementary: #757575;
+    --primary_alpha: #832339ce;
+    --secondary_alpha: #998454ce;
+    --complementary_alpha: #757575ce;
+    --page-background: #A7B8BD;
+    --warning: #ffee00;
+    --white: #F5F5F5;
+    --black: #121212;
+    --ok: #4CAF50;
+    --pending: #FFCA28;
+    --failed: #F44336;
+    --small: .8rem;
+    --regular: 1.6rem;
+    --medium: 3.2rem;
+    --large: 6.4rem;
+    --xlarge: 12.0rem;
+}
+
+@font-face {
+    font-family: "Montserrat";
+    src: url("../../fonts/Montserrat-Italic-VariableFont_wght.ttf");
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat" !important;
+}
+
+body {
+    background-color: var(--page-background);
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#login-form {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 2px 0px 26px 7px rgba(0, 0, 0, 0.36);
+    -webkit-box-shadow: 2px 0px 26px 7px rgba(0, 0, 0, 0.36);
+    -moz-box-shadow: 2px 0px 26px 7px rgba(0, 0, 0, 0.36);
+}
+
+#login-form > label {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--regular);
+    color: var(--primary);
+    font-weight: bolder;
+}
+
+#login-form input {
+    height: 60px;
+    padding: 0 10px;
+    outline: none;
+    border: none;
+    border-radius: 15px;
+}
+
+#login-form input:focus {
+    box-shadow: 2px 0px 26px -2px rgba(0, 0, 0, 0.36) inset;
+    -webkit-box-shadow: 2px 0px 26px -2px rgba(0, 0, 0, 0.36) inset;
+    -moz-box-shadow: 2px 0px 26px -2px rgba(0, 0, 0, 0.36) inset;
+}
+
+#login-form > button {
+    font-size: var(--regular);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    background-color: transparent;
+    display: inline-block;
+    padding: .8rem 3.2rem;
+    border-radius: 15px;
+    text-decoration: none;
+    transition: ease-in-out .2s;
+    cursor: pointer;
+}
+
+#login-form > button:hover {
+    transform: scale(1.1);
+    background-color: var(--primary);
+    color: var(--white);
+}

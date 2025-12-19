@@ -35,6 +35,16 @@ export async function findUserForAuthUsername(username) {
         where: {
             username
         },
-        attributes: ['user_uuid','username', 'password']
+        attributes: ['user_uuid','username', 'name', 'password'],
+        include: [
+            {
+                model: Role,
+                attributes: ['role']
+            },
+            {
+                model: Group,
+                attributes: ['group']
+            }
+        ]
     });
 }

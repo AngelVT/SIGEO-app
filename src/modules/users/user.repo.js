@@ -6,15 +6,15 @@ import { Permission } from "./models/permissions.model.js";
 const USER_MODELS = [
     {
         model: Role,
-        attributes: ['role']
+        attributes: ['role_id', 'role']
     },
     {
         model: Group,
-        attributes: ['group']
+        attributes: ['group_id', 'group']
     },
     {
         model: Permission,
-        attributes: ['permission']
+        attributes: ['permission_id', 'permission']
     }
 ];
 

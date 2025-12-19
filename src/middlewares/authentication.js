@@ -13,7 +13,7 @@ export function verifyToken(options = {
         if (!clientToken) {
             if (options.redirect) {
                 const destination = encodeURIComponent(req.originalUrl);
-                return res.redirect(`/?url=${destination}`);
+                return res.redirect(`/login?url=${destination}`);
             }
 
             if (options.blockAccess) {
@@ -34,7 +34,7 @@ export function verifyToken(options = {
             }
 
             if (options.redirect) {
-                return res.redirect('/');
+                return res.redirect('/login');
             }
             
             return res.status(401).json({ msg: 'Token verification failed' });
