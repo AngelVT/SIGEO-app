@@ -152,6 +152,20 @@ export async function findGroupResponsePendingOficios(group_id) {
     });
 }
 
+export async function findOficiosFiltered(filters) {
+    const oficios = await Oficio.findAll({
+        where: filters,
+        include: OFICIO_MODELS,
+        order: [
+            ['invoice', 'ASC']
+        ]
+    });
+
+    const cleanOficios = oficios.map(o => generateSafeOficio(o));
+
+    return cleanOficios;
+}
+
 export async function createOficio(oficio_invoice, true_invoice, invoice, year, name, subject, reception_date, deadline, group_id, response_required, transaction) {
     const [newOficio, created] = await Oficio.findOrCreate({
         where: {

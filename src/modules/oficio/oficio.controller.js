@@ -53,6 +53,23 @@ export const getAllOficios = requestHandler(async (req, res) => {
     console.log("Get request completed, all oficios requested");
 });
 
+export const getOficiosFiltered = requestHandler(async (req, res) => {
+    const { group_id } = req.user;
+    const { full } = req;
+    const filters = req.query;
+
+    let response;
+
+    if(full)
+        response = await oficioService.requestOficiosFiltered(filters);
+    else
+        response = await oficioService.requestGroupOficiosFiltered(filters, group_id);
+
+    res.status(200).json(response);
+
+    console.log("Get request completed, filtered search");
+});
+
 export const getUnansweredOficios = requestHandler(async (req, res) => {
     const { group_id } = req.user;
     const { full } = req;

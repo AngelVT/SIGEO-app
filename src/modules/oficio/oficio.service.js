@@ -2,12 +2,12 @@ import * as oficioRepo from './oficio.repo.js';
 import { validate as isUuid } from 'uuid';
 import ValidationError from '../../errors/validationError.js';
 import ResourceError from '../../errors/ResourceError.js';
+import AuthenticationError from '../../errors/AuthenticationError.js';
 import * as oficioUtils from './oficio.utils.js';
 import { validateGroup } from '../../utils/access-control.utils.js';
 import { validateDate, parseBool, validatePFFile, saveFile, removeFile } from '../../utils/data.utils.js';
 import { pool } from '../../config/db.config.js';
 import { consoleError, consoleInfo } from '../../utils/log.utils.js';
-import FileSystemError from '../../errors/FileSystemError.js';
 
 //Oficio services
 export async function requestAllPendingOficios() {
@@ -83,6 +83,39 @@ export async function requestAllGroupOficios(userGroup) {
 
     if (!oficios || oficios.length === 0) {
         throw new ResourceError(`No se encontraron oficios pendientes.`);
+    }
+
+    return {
+        oficios
+    }
+}
+
+export async function requestOficiosFiltered(filters) {
+    const validatedFilters = await oficioUtils.filterBuilder(filters);
+
+    const oficios = await oficioRepo.findOficiosFiltered(validatedFilters);
+
+    if (!oficios || oficios.length === 0) {
+        throw new ResourceError(`No se encontraron oficios con los parámetros de búsqueda establecidos.`);
+    }
+
+    return {
+        oficios
+    }
+}
+
+export async function requestGroupOficiosFiltered(filters, userGroup) {
+    const validatedFilters = await oficioUtils.filterBuilder(filters);
+
+    if(validatedFilters.group_id !== userGroup)
+        throw new AuthenticationError('No tienes permitido ver oficios pertenecientes a otros grupos.');
+
+    validatedFilters.group_id = userGroup;
+
+    const oficios = await oficioRepo.findOficiosFiltered(validatedFilters);
+
+    if (!oficios || oficios.length === 0) {
+        throw new ResourceError(`No se encontraron oficios con los parámetros de búsqueda establecidos.`);
     }
 
     return {

@@ -8,6 +8,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/socket.js"></script>
     <script src="js/navigation.js" defer></script>
+    <script src="js/display.js" defer></script>
     <script src="js/funtionality.js" defer></script>
     <title>SIGEO - Dashboard</title>
 </head>
@@ -22,8 +23,8 @@
     </nav>
     <section class="controls-panel">
         <div class="control-set" id="oficios-controls">
-            <form id="invoice_search">
-                <input type="number" placeholder="Folio">
+            <form id="oficio_search">
+                <input type="number" name="invoice" placeholder="Folio">
                 <select name="group">
                     <option value="">Seleccionar ...</option>
                     <option value="2">Dirección General</option>
@@ -48,9 +49,9 @@
                 <button type="submit">Buscar</button>
             </form>
 
-            <button class="bi-folder-plus all-button" id="btn_create_oficio"></button>
-
             <button class="bi-archive all-button" id="btn_all_oficio"></button>
+
+            <button class="bi-folder-plus all-button" id="btn_create_oficio"></button>
         </div>
 
         <div class="control-set dis-none" id="emitidos-controls">
@@ -67,9 +68,9 @@
                 <button type="submit">Buscar</button>
             </form>
 
-            <button class="bi-folder-plus all-button" id="btn_create_emitido"></button>
-
             <button class="bi-archive all-button" id="btn_all_emitido"></button>
+
+            <button class="bi-folder-plus all-button" id="btn_create_emitido"></button>
         </div>
 
         <div class="control-set dis-none" id="users-controls">
@@ -99,9 +100,9 @@
                 <button type="submit">Buscar</button>
             </form>
 
-            <button class="bi-person-plus all-button" id="btn_create_user"></button>
-
             <button class="bi-people all-button" id="btn_all_user"></button>
+
+            <button class="bi-person-plus all-button" id="btn_create_user"></button>
         </div>
 
     </section>
@@ -114,5 +115,24 @@
         <div class="results-container" id="results">
         </div>
     </section>
+    <script>
+        const startYear = 2025;
+        const currentYear = new Date().getFullYear();
+
+        const yearSelectors = document.querySelectorAll('select[name="year"]');
+
+        const yearArray = [];
+
+        for (let i = currentYear; i >= startYear; i--) {
+            if (i === currentYear)
+                yearArray.push(`<option value="${i}" selected>${i}</option>`);
+            else
+                yearArray.push(`<option value="${i}">${i}</option>`);
+        }
+
+        for (const ys of yearSelectors) {
+            ys.innerHTML = yearArray.join('\n')
+        }
+    </script>
 </body>
 </html>

@@ -30,6 +30,12 @@ router.get('/in', [
     groupDelegate(['DG', 'SYSTEM'])
 ], oficioControl.getAllOficios);
 
+router.get('/in/filtered', [
+    verifyToken(),
+    verifyPermission(['oficio:read','oficio:manage']),
+    groupDelegate(['DG', 'SYSTEM'])
+], oficioControl.getOficiosFiltered);
+
 router.post('/in', [
     verifyToken(),
     verifyGroup(['DG', 'SYSTEM']),

@@ -12,7 +12,7 @@ export async function requestLogin(username, password) {
         
     }
 
-    if (!compare(password, user.password)) {
+    if (!await compare(password, user.password)) {
         throw new AuthenticationError("Accesos denegado usuario debido a credenciales invalidas.");
     }
 
