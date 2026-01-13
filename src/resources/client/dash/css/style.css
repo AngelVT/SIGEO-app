@@ -171,6 +171,22 @@ nav > h1 {
     color: var(--white);
     padding: 10px 0;
     text-align: center;
+    font-size: large;
+}
+
+.result-top p {
+    cursor: pointer;
+}
+
+.result-top p > a {
+    text-decoration: none;
+    color: var(--white);
+    transition: all 0.1s ease-in-out;
+    margin-left: 5px;
+}
+
+.result-top p > a:hover {
+    color: var(--complementary);
 }
 
 .result-body {
@@ -298,4 +314,68 @@ nav > h1 {
 
 .comment section {
     padding: 10px;
+}
+
+.panel-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--complementary_alpha);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panel-background form {
+    border-radius: 15px;
+    border: 1px solid var(--primary);
+    padding: 10px 20px;
+    
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    width: 40%;
+    gap: 10px;
+}
+
+.panel-background form > label {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-background form > p {
+    width: 100%;
+    text-align: center;
+    font-size: large;
+}
+
+.panel-background form > div {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.panel-background form > div > p {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.panel-background form > div > label {
+    width: 25%;
+    margin-bottom: 10px;
+}
+
+.panel-background .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--primary);
+    font-size: x-large;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+}
+
+.panel-background .close:hover {
+    color: var(--primary_alpha);
+    transform: scale(1.05);
 }

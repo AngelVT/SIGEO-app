@@ -9,6 +9,16 @@ export const getAllUsers = requestHandler(async (req, res) => {
     console.log("Get request completed, all users requested");
 });
 
+export const getUsersFiltered = requestHandler(async (req, res) => {
+    const filters = req.query;
+
+    const response = await userService.requestUsersFiltered(filters);
+
+    res.status(200).json(response);
+
+    console.log("Get request completed, filtered user search requested");
+});
+
 export const getSingleUser = requestHandler(async (req, res) => {
     const { user_id } = req.params;
 
@@ -20,9 +30,9 @@ export const getSingleUser = requestHandler(async (req, res) => {
 });
 
 export const createUser = requestHandler(async (req, res) => {
-    const { name, username, password, group, role, permissions } = req.body;
+    const { name, middleName, lastName, username, password, group, role, permissions } = req.body;
 
-    const response = await userService.requestUserCreation(name, username, password, group, role, permissions);
+    const response = await userService.requestUserCreation(name, middleName, lastName, username, password, group, role, permissions);
 
     res.status(200).json(response);
 

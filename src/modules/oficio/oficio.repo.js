@@ -61,6 +61,7 @@ export async function findAllOficios() {
     const oficios = await Oficio.findAll({
         include: OFICIO_MODELS,
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ]
     });
@@ -77,6 +78,7 @@ export async function findAllGroupOficios(group_id) {
         },
         include: OFICIO_MODELS,
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ]
     });
@@ -93,6 +95,7 @@ export async function findPendingOficios() {
         },
         include: OFICIO_MODELS,
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ]
     });
@@ -110,6 +113,7 @@ export async function findGroupPendingOficios(group) {
         },
         include: OFICIO_MODELS,
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ]
     });
@@ -157,6 +161,7 @@ export async function findOficiosFiltered(filters) {
         where: filters,
         include: OFICIO_MODELS,
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ]
     });
@@ -358,12 +363,28 @@ function generateSafeOficio(oficio) {
 export async function findAllEmittedOficios() {
     const oficios = await OficioEmitted.findAll({
         order: [
+            ['year', 'ASC'],
             ['invoice', 'ASC']
         ],
         include: EMITTED_OFICIO_MODELS
     });
 
     const cleanOficios = oficios.map(o => generateSafeEmittedOficio(o));
+
+    return cleanOficios;
+}
+
+export async function findEmittedFiltered(filters) {
+    const oficios = await OficioEmitted.findAll({
+        where: filters,
+        include: EMITTED_OFICIO_MODELS,
+        order: [
+            ['year', 'ASC'],
+            ['invoice', 'ASC']
+        ]
+    });
+
+    const cleanOficios = oficios.map(o => generateSafeOficio(o));
 
     return cleanOficios;
 }

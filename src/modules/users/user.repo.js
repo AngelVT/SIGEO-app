@@ -37,6 +37,14 @@ export async function findSingleUser(uuid) {
     });
 }
 
+export async function findUsersFiltered(filters) {
+    return User.findAll({
+        where: filters,
+        attributes: USER_ATTRIBUTES,
+        include: USER_MODELS
+    });
+}
+
 export async function saveNewUser(name, username, password, role_id, group_id, permissions) {
     const [new_user, created] = await User.findOrCreate({
         where: {

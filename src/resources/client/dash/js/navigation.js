@@ -6,6 +6,18 @@ const oficioSearch = document.getElementById('oficios-controls');
 const emitidoSearch = document.getElementById('emitidos-controls');
 const userSearch = document.getElementById('users-controls');
 
+const oficioRegPanel = document.getElementById('oficio-panel');
+const emittedRegPanel = document.getElementById('emitted-panel');
+const userRegPanel = document.getElementById('user-panel');
+
+const oficioRegBtn = document.getElementById('btn_create_oficio');
+const emittedRegBtn = document.getElementById('btn_create_emitido');
+const userRegBtn = document.getElementById('btn_create_user');
+
+const oficioRegClose = document.getElementById('oficio-panel-close');
+const emittedRegClose = document.getElementById('emitted-panel-close');
+const userRegClose = document.getElementById('user-panel-close');
+
 const links = document.querySelector('#navigation_links').querySelectorAll('li');
 const searchForms = [oficioSearch, emitidoSearch, userSearch];
 
@@ -53,3 +65,35 @@ function hideShow(link, target) {
     link.classList.add('selected');
     target.classList.remove('dis-none');
 }
+
+oficioRegBtn.addEventListener('click', () => {
+    oficioRegPanel.classList.remove('dis-none');
+    oficioRegBtn.setAttribute('disabled', 'true');
+});
+
+oficioRegClose.addEventListener('click', () => {
+    oficioRegPanel.classList.add('dis-none');
+    oficioRegBtn.removeAttribute('disabled');
+});
+
+// -------------------------------------------
+emittedRegBtn.addEventListener('click', () => {
+    emittedRegPanel.classList.remove('dis-none');
+    emittedRegBtn.setAttribute('disabled', 'true');
+});
+
+emittedRegClose.addEventListener('click', () => {
+    emittedRegPanel.classList.add('dis-none');
+    emittedRegBtn.removeAttribute('disabled');
+});
+
+// -------------------------------------------
+userRegBtn.addEventListener('click', () => {
+    userRegPanel.classList.remove('dis-none');
+    userRegBtn.setAttribute('disabled', 'true');
+});
+
+userRegClose.addEventListener('click', () => {
+    userRegPanel.classList.add('dis-none');
+    userRegBtn.removeAttribute('disabled');
+});

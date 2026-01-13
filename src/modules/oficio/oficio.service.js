@@ -370,6 +370,21 @@ export async function requestEmittedOficio(uuid) {
     }
 }
 
+export async function requestEmittedFiltered(filters) {
+    const validatedFilters = await oficioUtils.filterBuilder(filters);
+
+    const emittedOficios = await oficioRepo.findEmittedFiltered(validatedFilters);
+
+    if (!emittedOficios || emittedOficios.length === 0) {
+        throw new ResourceError(`No se encontraron oficios con los parámetros de búsqueda establecidos.`);
+    }
+
+    return {
+        emittedOficios
+    }
+}
+
+
 export async function requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file) {
     if (typeof is_response === 'undefined') {
         throw new ValidationError("No se pudo crear el oficio debido a información faltante.");
@@ -387,6 +402,14 @@ export async function requestEmittedOficioCreation(emission_date, name, position
 
     if ((emission_date && !validateDate(emission_date)) || (reception_date && !validateDate(reception_date))) {
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
+    }
+
+    if (!emission_date) {
+        emission_date = undefined;
+    }
+
+    if (!reception_date) {
+        reception_date = undefined;
     }
 
     if (file && !validatePFFile(file)) {

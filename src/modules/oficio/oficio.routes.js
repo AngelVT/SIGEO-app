@@ -74,12 +74,20 @@ router.get('/emitted', [
     verifyPermission(['oficio:read','oficio:manage'])
 ], oficioControl.getEmittedOficios);
 
-router.get('/emitted/:emitted_of_uuid', [
+router.get('/emitted/id/:emitted_of_uuid', [
     verifyToken(),
     verifyGroup(['DG', 'SYSTEM']),
     verifyRole(['system', 'admin']),
     verifyPermission(['oficio:read','oficio:manage'])
 ], oficioControl.getEmittedOficio);
+
+router.get('/emitted/filtered', [
+    verifyToken(),
+    verifyGroup(['DG', 'SYSTEM']),
+    verifyRole(['system', 'admin']),
+    verifyPermission(['oficio:read','oficio:manage']),
+    //groupDelegate(['DG', 'SYSTEM'])
+], oficioControl.getEmittedFiltered);
 
 router.post('/emitted', [
     verifyToken(),

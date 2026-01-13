@@ -158,6 +158,16 @@ export const getEmittedOficio = requestHandler(async (req, res) => {
     console.log("Get request completed, single emitted oficio requested");
 });
 
+export const getEmittedFiltered = requestHandler(async (req, res) => {
+    const filters = req.query;
+
+    const response = await oficioService.requestEmittedFiltered(filters);
+
+    res.status(200).json(response);
+
+    console.log("Get request completed, filtered search");
+});
+
 export const createEmittedOficio = requestHandler(async (req, res) => {
     const { emission_date, name, position, subject, reception_date, is_response, oficio_uuid } = req.body;
     const file = req.file;

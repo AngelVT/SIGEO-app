@@ -11,7 +11,14 @@ router.get('/', [
     verifyPermission(['user:read','user:manage'])
 ], userControl.getAllUsers);
 
-router.get('/:user_id', [
+router.get('/filtered', [
+    verifyToken(),
+    verifyGroup(['SYSTEM']),
+    verifyRole(['system']),
+    verifyPermission(['user:read','user:manage'])
+], userControl.getUsersFiltered);
+
+router.get('/id/:user_id', [
     verifyToken(),
     verifyGroup(['SYSTEM']),
     verifyRole(['system']),

@@ -18,6 +18,12 @@ const OFICIO_MAP = {
     deadline: {
         text: 'Fecha limite',
         type: 'date'
+    },
+    emitted_oficio: {
+        links: 'emitted_of_uuid',
+        text: 'Respuesta',
+        linkText: 'emitted_of_invoice',
+        functionName: 'getEmittedUUID'
     }
 }
 
@@ -41,6 +47,12 @@ const EMITTED_MAP = {
     reception_date: {
         text: 'Fecha de recepción',
         type: 'date'
+    },
+    oficio: {
+        links: 'oficio_uuid',
+        text: 'Respuesta para',
+        linkText: 'oficio_invoice',
+        functionName: 'getOficioUUID'
     }
 }
 
@@ -75,7 +87,11 @@ function hideShowResult(trigger, target) {
     targetElement.classList.toggle("dis-none");
 }
 
-function generateResultTop(uuid, labelText) {
+function generateResultTop(uuid, labelText, file, {
+    relationFlag = false,
+    useAccomplishedStatus = false,
+    accomplishedStatus = false,
+} = {}) {
     const top = document.createElement('div');
     const label = document.createElement('p');
 
@@ -84,6 +100,33 @@ function generateResultTop(uuid, labelText) {
 
     label.innerText = labelText;
 
+    if (file) {
+        const fileLink = document.createElement('a');
+
+        fileLink.setAttribute('class', 'bi-file-earmark-pdf-fill');
+
+        fileLink.target = '_blank';
+        fileLink.href = file;
+
+        label.appendChild(fileLink)
+    }
+
+    if (relationFlag) {
+        const relationFlag = document.createElement('span');
+
+        relationFlag.setAttribute('class', 'bi-files');
+
+        label.appendChild(relationFlag);
+    }
+
+    if (useAccomplishedStatus) {
+        const status = document.createElement('span');
+
+        status.setAttribute('class', accomplishedStatus ? 'bi-file-earmark-check-fill' : 'bi-file-earmark-x-fill');
+
+        label.appendChild(status);
+    }
+
     top.appendChild(label);
 
     top.setAttribute('onclick', `hideShowResult(this, 'body_${uuid}')`)
@@ -91,14 +134,21 @@ function generateResultTop(uuid, labelText) {
     return top;
 }
 
-function generateResultBody(uuid, content, keys = [], map, options = { comments: true, status: true, permissions: false, layout: 'oficio' }) {
+function generateResultBody(uuid, content, keys = [], map, { 
+    comments = true, 
+    status = true, 
+    permissions = false, 
+    layout = 'oficio', 
+    hasRelation = false, 
+    relation = '' 
+} = {}) {
     const body = document.createElement('div');
 
     body.setAttribute('class', 'dis-none result-body');
     body.setAttribute('id', `body_${uuid}`);
 
     const dataDiv = document.createElement('div');
-    dataDiv.setAttribute('class', `result-data ${options.layout}`);
+    dataDiv.setAttribute('class', `result-data ${layout}`);
 
     body.appendChild(dataDiv);
 
@@ -122,7 +172,28 @@ function generateResultBody(uuid, content, keys = [], map, options = { comments:
         }
     }
 
-    if (options.status) {
+    if (hasRelation) {
+        const { text, linkText, functionName, links } = map[relation];
+
+        if (content[relation]) {
+            const p = document.createElement('p');
+            const b = document.createElement('b');
+            const link = document.createElement('span');
+
+            b.innerText = `${text}: `;
+
+            p.appendChild(b);
+
+            link.innerText = content[relation][linkText];
+            link.setAttribute('onclick', `${functionName}('${content[relation][links]}');`);
+            
+            p.appendChild(link);
+
+        dataDiv.appendChild(p);
+        }
+    }
+
+    if (status) {
         const statusDiv = document.createElement('div');
         statusDiv.setAttribute('class', 'result-status');
 
@@ -138,7 +209,7 @@ function generateResultBody(uuid, content, keys = [], map, options = { comments:
         body.appendChild(statusDiv);
     }
 
-    if (options.permissions) {
+    if (permissions) {
         const permissionsDiv = document.createElement('div');
         permissionsDiv.setAttribute('class', 'result-permissions');
 
@@ -163,7 +234,7 @@ function generateResultBody(uuid, content, keys = [], map, options = { comments:
         body.appendChild(permissionsDiv);
     }
 
-    if (options.comments) {
+    if (comments) {
         const commentsDiv = document.createElement('div');
         commentsDiv.setAttribute('class', 'result-comments');
 
@@ -202,8 +273,15 @@ function generateResultBody(uuid, content, keys = [], map, options = { comments:
 function createOficioResult(obj, uuid, invoice) {
     const result = document.createElement('div');
 
-    const top = generateResultTop(uuid, invoice);
-    const body = generateResultBody(uuid, obj, ['true_invoice', 'name', 'subject', 'reception_date', 'deadline'], OFICIO_MAP);
+    const top = generateResultTop(uuid, invoice, obj.file, {
+        relationFlag: obj.response_required,
+        useAccomplishedStatus: true,
+        accomplishedStatus: obj.accomplished
+    });
+    const body = generateResultBody(uuid, obj, ['true_invoice', 'name', 'subject', 'reception_date', 'deadline'], OFICIO_MAP, {
+        hasRelation: obj.response_required,
+        relation: 'emitted_oficio'
+    });
 
     result.appendChild(top);
     result.appendChild(body);
@@ -214,8 +292,10 @@ function createOficioResult(obj, uuid, invoice) {
 function createEmittedResult(obj, uuid, invoice) {
     const result = document.createElement('div');
 
-    const top = generateResultTop(uuid, invoice);
-    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date'], EMITTED_MAP, { comments: false, status: false, layout: 'emitted' });
+    const top = generateResultTop(uuid, invoice, obj.file, {
+        relationFlag: obj.is_response
+    });
+    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date'], EMITTED_MAP, { comments: false, status: false, layout: 'emitted', hasRelation: true, relation: 'oficio' });
 
     result.appendChild(top);
     result.appendChild(body);

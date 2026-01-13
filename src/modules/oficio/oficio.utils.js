@@ -2,6 +2,7 @@ import { Oficio } from "./models/oficio.model.js";
 import { OficioEmitted } from "./models/emitted-oficio.model.js";
 import { Group } from "../users/models/groups.model.js";
 import ValidationError from "../../errors/validationError.js";
+import { parseBool } from "../../utils/data.utils.js";
 
 export async function generateOficioInvoice(year) {
     let invoice;
@@ -58,11 +59,11 @@ export async function generateEmittedOficioInvoice(year) {
 }
 
 export async function filterBuilder(filters) {
-    const { invoice, year, group, name, subject } = filters;
+    const { invoice, year, group, name, subject, accomplished, response_required, position, is_response } = filters;
     const validatedFilter = {}
 
-    if (!invoice && !year && !group && !name && !subject) {
-        throw new ValidationError(`Se requiere mínimo uno de los siguientes filtros para realizar una búsqueda: folio, año, nombre, asunto.`);
+    if (!invoice && !year && !group && !name && !subject && !accomplished && !response_required) {
+        throw new ValidationError(`Se requiere mínimo un filtro para realizar una búsqueda.`);
     }
 
     if (invoice) {
@@ -93,6 +94,14 @@ export async function filterBuilder(filters) {
         }
     }
 
+    if (position) {
+        if (typeof position === 'string') {
+            validatedFilter.position = position;
+        } else {
+            throw new ValidationError(`El cargo proporcionado no es valido.`);
+        }
+    }
+
     if (subject) {
         if (typeof subject === 'string') {
             validatedFilter.subject = subject;
@@ -116,6 +125,36 @@ export async function filterBuilder(filters) {
         } else {
             throw new ValidationError(invalidGroupMsg);
         }
+    }
+
+    if (accomplished) {
+        const parsed = parseBool(accomplished);
+
+        if (typeof parsed !== 'boolean') {
+            throw new ValidationError('Completado? tiene un valor invalido');
+        }
+
+        validatedFilter.accomplished = parsed;
+    }
+
+    if (response_required) {
+        const parsed = parseBool(response_required);
+
+        if (typeof parsed !== 'boolean') {
+            throw new ValidationError('Requiere respuesta? tiene un valor invalido');
+        }
+
+        validatedFilter.response_required = parsed;
+    }
+
+    if (is_response) {
+        const parsed = parseBool(is_response);
+
+        if (typeof parsed !== 'boolean') {
+            throw new ValidationError('Es respuesta? tiene un valor invalido');
+        }
+
+        validatedFilter.is_response = parsed;
     }
 
     return validatedFilter;
