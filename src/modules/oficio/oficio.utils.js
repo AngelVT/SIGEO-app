@@ -1,7 +1,7 @@
 import { Oficio } from "./models/oficio.model.js";
 import { OficioEmitted } from "./models/emitted-oficio.model.js";
 import { Group } from "../users/models/groups.model.js";
-import ValidationError from "../../errors/validationError.js";
+import ValidationError from "../../errors/ValidationError.js";
 import { parseBool } from "../../utils/data.utils.js";
 
 export async function generateOficioInvoice(year) {

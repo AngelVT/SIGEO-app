@@ -1,6 +1,6 @@
 import * as userRepo from './user.repo.js';
 import { validate as isUuid } from 'uuid';
-import ValidationError from '../../errors/validationError.js';
+import ValidationError from '../../errors/ValidationError.js';
 import ResourceError from '../../errors/ResourceError.js';
 import { hash } from 'bcrypt';
 import * as acValidations from '../../utils/access-control.utils.js';

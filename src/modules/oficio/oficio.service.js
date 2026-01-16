@@ -1,6 +1,6 @@
 import * as oficioRepo from './oficio.repo.js';
 import { validate as isUuid } from 'uuid';
-import ValidationError from '../../errors/validationError.js';
+import ValidationError from '../../errors/ValidationError.js';
 import ResourceError from '../../errors/ResourceError.js';
 import AuthenticationError from '../../errors/AuthenticationError.js';
 import * as oficioUtils from './oficio.utils.js';
