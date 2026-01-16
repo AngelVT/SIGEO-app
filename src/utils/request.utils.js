@@ -1,6 +1,6 @@
-import ValidationError from "../errors/validationError.js";
+import ValidationError from "../errors/ValidationError.js";
 import ResourceError from "../errors/ResourceError.js";
-import DatabaseError from "../errors/databaseError.js";
+import DatabaseError from "../errors/DatabaseError.js";
 import FileSystemError from "../errors/FileSystemError.js";
 import AuthenticationError from "../errors/AuthenticationError.js";
 import * as log from "./log.utils.js";
