@@ -180,11 +180,11 @@ export const createEmittedOficio = requestHandler(async (req, res) => {
 });
 
 export const updateEmittedOficio = requestHandler(async (req, res) => {
-    const { emission_date, name, position, subject, reception_date, is_response, oficio_uuid } = req.body;
+    const { emission_date, name, position, subject, reception_date, oficio_uuid } = req.body;
     const { emitted_of_uuid } = req.params;
     const file = req.file;
 
-    const response = await oficioService.requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file);
+    const response = await oficioService.requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, oficio_uuid, file);
     
     res.status(200).json(response);
 

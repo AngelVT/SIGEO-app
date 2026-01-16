@@ -54,4 +54,6 @@ export async function filterBuilder(filters) {
             throw new ValidationError(invalidRoleMsg);
         }
     }
+
+    return validatedFilter;
 }

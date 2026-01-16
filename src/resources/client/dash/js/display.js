@@ -23,7 +23,14 @@ const OFICIO_MAP = {
         links: 'emitted_of_uuid',
         text: 'Respuesta',
         linkText: 'emitted_of_invoice',
-        functionName: 'getEmittedUUID'
+        functionName: 'getEmittedUUID',
+        type: 'none',
+    },
+    file: {
+        text: 'Archivo PDF',
+        type: 'file',
+        accept: '.pdf',
+        name: 'oficio_pdf'
     }
 }
 
@@ -48,11 +55,24 @@ const EMITTED_MAP = {
         text: 'Fecha de recepción',
         type: 'date'
     },
-    oficio: {
+    oficio_uuid: {
+        text: 'Respuesta para',
+        type: 'select',
+        default: {
+            text: 'oficio_text',
+            value: 'oficio_uuid'
+        },
+        options: [],
         links: 'oficio_uuid',
         text: 'Respuesta para',
-        linkText: 'oficio_invoice',
-        functionName: 'getOficioUUID'
+        linkText: 'oficio_text',
+        functionName: 'getOficioUUID',
+    },
+    file: {
+        text: 'Archivo PDF',
+        type: 'file',
+        accept: '.pdf',
+        name: 'oficio_pdf'
     }
 }
 
@@ -63,19 +83,114 @@ const USER_MAP = {
     },
     username: {
         text: 'Usuario',
-        type: 'text'
+        type: 'text',
+        attributes: 'readonly'
     },
-    group: {
+    group_id: {
         text: 'Dirección',
-        nested: true,
-        property: 'group',
-        type: 'text'
+        type: 'select',
+        options: [
+            {
+                value: 1,
+                text: 'Sistema SIGEO'
+            },
+            {
+                value: 2,
+                text: 'Dirección General'
+            },
+            {
+                value: 3,
+                text: 'Dirección de Licencias y Control Urbano'
+            },
+            {
+                value: 4,
+                text: 'Dirección de Investigación y Planeación Estratégica'
+            },
+            {
+                value: 5,
+                text: 'Órgano Interno de Control'
+            },
+            {
+                value: 6,
+                text: 'Dirección de Asuntos Jurídico'
+            },
+            {
+                value: 7,
+                text: 'Dirección de Finanzas y Administración'
+            }
+        ]
     },
-    role: {
+    role_id: {
         text: 'Rol',
-        nested: true,
-        property: 'role',
-        type: 'text'
+        type: 'select',
+        options: [
+            {
+                value: 1,
+                text: 'System'
+            },
+            {
+                value: 2,
+                text: 'Admin'
+            },
+            {
+                value: 3,
+                text: 'Moderator'
+            },
+            {
+                value: 4,
+                text: 'User'
+            }
+        ]
+    },
+    permissions: {
+        text: 'Permisos',
+        type: 'checkbox-group',
+        checkboxes: [
+            {
+                value: 1,
+                text: "user:manage"
+            },
+            {
+                value: 2,
+                text: "user:read"
+            },
+            {
+                value: 3,
+                text: "user:create"
+            },
+            {
+                value: 4,
+                text: "user:update"
+            },
+            {
+                value: 5,
+                text: "user:delete"
+            },
+            {
+                value: 6,
+                text: "oficio:manage"
+            },
+            {
+                value: 7,
+                text: "oficio:read"
+            },
+            {
+                value: 8,
+                text: "oficio:create"
+            },
+            {
+                value: 9,
+                text: "oficio:update"
+            },
+            {
+                value: 10,
+                text: "oficio:delete"
+            },
+            {
+                value: 11,
+                text: "oficio:comment"
+            }
+        ]
     }
 }
 
@@ -87,7 +202,7 @@ function hideShowResult(trigger, target) {
     targetElement.classList.toggle("dis-none");
 }
 
-function generateResultTop(uuid, labelText, file, {
+function generateResultTop(uuid, labelText, {
     relationFlag = false,
     useAccomplishedStatus = false,
     accomplishedStatus = false,
@@ -100,17 +215,6 @@ function generateResultTop(uuid, labelText, file, {
 
     label.innerText = labelText;
 
-    if (file) {
-        const fileLink = document.createElement('a');
-
-        fileLink.setAttribute('class', 'bi-file-earmark-pdf-fill');
-
-        fileLink.target = '_blank';
-        fileLink.href = file;
-
-        label.appendChild(fileLink)
-    }
-
     if (relationFlag) {
         const relationFlag = document.createElement('span');
 
@@ -122,7 +226,7 @@ function generateResultTop(uuid, labelText, file, {
     if (useAccomplishedStatus) {
         const status = document.createElement('span');
 
-        status.setAttribute('class', accomplishedStatus ? 'bi-file-earmark-check-fill' : 'bi-file-earmark-x-fill');
+        status.setAttribute('class', accomplishedStatus ? 'bi-check-circle' : 'bi-x-circle');
 
         label.appendChild(status);
     }
@@ -137,18 +241,41 @@ function generateResultTop(uuid, labelText, file, {
 function generateResultBody(uuid, content, keys = [], map, { 
     comments = true, 
     status = true, 
-    permissions = false, 
+    //permissions = false, 
     layout = 'oficio', 
     hasRelation = false, 
-    relation = '' 
+    relation = '',
+    updateURL = '/home',
+    bodyType = 'form-data',
+    file = undefined
 } = {}) {
-    const body = document.createElement('div');
+    const body = document.createElement('section');
+    const originalData = {};
 
     body.setAttribute('class', 'dis-none result-body');
     body.setAttribute('id', `body_${uuid}`);
 
-    const dataDiv = document.createElement('div');
+    const linksDiv = document.createElement('div');
+
+    if (file) {
+        const fileLink = document.createElement('a');
+
+        linksDiv.setAttribute('class', 'links');
+        fileLink.setAttribute('class', 'bi-file-earmark-pdf');
+
+        fileLink.target = '_blank';
+        fileLink.href = file;
+
+        linksDiv.appendChild(fileLink);
+    }
+
+    body.appendChild(linksDiv);
+
+    const dataDiv = document.createElement('form');
     dataDiv.setAttribute('class', `result-data ${layout}`);
+    dataDiv.setAttribute('action', `${updateURL}`);
+    dataDiv.setAttribute('onsubmit', `updateResult(event);`);
+    dataDiv.setAttribute('body', `${bodyType}`);
 
     body.appendChild(dataDiv);
 
@@ -156,40 +283,106 @@ function generateResultBody(uuid, content, keys = [], map, {
         if (!Object.hasOwn(content, key)) continue;
         
         if (keys.includes(key)) {
-            const p = document.createElement('p');
-            const b = document.createElement('b');
-            const span = document.createElement('span');
+            originalData[key] = map[key].nested ? content[key][map[key].property] : content[key];
 
-            b.innerText = `${map[key].text}: `;
+            const label = document.createElement('label');
 
-            p.appendChild(b);
+            switch(map[key].type) {
+                case 'text':
+                    label.innerHTML = `
+                    <b>${map[key].text}:</b>
+                    <input type="text" name="${key}" value="${map[key].nested ? content[key][map[key].property] : content[key]}" ${map[key].attributes}>
+                    `
 
-            span.innerText = map[key].type === 'date' ? new Date(content[key]).toLocaleDateString(undefined, { timeZone: 'UTC' }) : map[key].nested ? content[key][map[key].property] : content[key];
+                    dataDiv.appendChild(label);
+                    break;
+                case 'date':
+                    label.innerHTML = `
+                    <b>${map[key].text}:</b>
+                    <input type="date" name="${key}" ${content[key] === null ? '' : `value="${content[key]}"`} ${map[key].attributes}>
+                    `
 
-            p.appendChild(span);
+                    dataDiv.appendChild(label);
+                    break;
+                case 'file':
+                    label.innerHTML = `
+                    <b>${map[key].text}:</b>
+                    <input type="file" name="${map[key].name}" accept="${map[key].accept}" ${map[key].attributes}>
+                    `
 
-            dataDiv.appendChild(p);
+                    dataDiv.appendChild(label);
+                    break;
+                case 'select':
+                    const options = [];
+                    for (const o of map[key].options) {
+                        const option = `<option value="${o.value}" ${
+                        map[key].default ? '' : content[key] === o.value ? 'selected' : ''
+                        }>${o.text}</option>`;
+
+                        options.push(option);
+                    }
+
+                    if (map[key].default && content[map[key].default.value]) {
+                        options.push(`<option value="${content[map[key].default.value]}" selected>${content[map[key].default.text]}</option>`);
+                    }
+
+                    label.innerHTML = `
+                    <b>${map[key].text}:</b>
+                    <select name="${key}" ${map[key].attributes}>
+                        ${options.join('\n')}
+                    </select>
+                    `
+
+                    dataDiv.appendChild(label);
+                    break;
+
+                case 'checkbox-group':
+                    const div = document.createElement('div');
+                    const checkOptions = [];
+
+                    for (const c of map[key].checkboxes) {
+                        const option = `<label>
+                        <input value="${c.value}" name="${key}" type="checkbox" ${content[key].includes(c.value) ? 'checked' : ''}>
+                        ${c.text}
+                        </label>`;
+
+                        checkOptions.push(option);
+                    }
+
+                    div.innerHTML = `
+                    <b>${map[key].text}:</b>
+                    ${checkOptions.join('\n')}`
+
+                    dataDiv.appendChild(div);
+                    break;
+            }
         }
     }
 
+    const originalInput = document.createElement('input');
+    const submitButton = document.createElement('button');
+
+    originalInput.type = 'hidden';
+    originalInput.value = JSON.stringify(originalData);
+    originalInput.name = 'original_data'
+
+    dataDiv.appendChild(originalInput);
+
+    submitButton.type = 'submit';
+    submitButton.innerText = 'Actualizar';
+
+    dataDiv.appendChild(submitButton);
+
     if (hasRelation) {
-        const { text, linkText, functionName, links } = map[relation];
+        const { functionName, links } = map[relation];
 
         if (content[relation]) {
-            const p = document.createElement('p');
-            const b = document.createElement('b');
-            const link = document.createElement('span');
+            const link = document.createElement('a');
 
-            b.innerText = `${text}: `;
+            link.setAttribute('class', 'bi-send-arrow-down');
+            link.setAttribute('onclick', `${functionName}('${content[links]}');`);
 
-            p.appendChild(b);
-
-            link.innerText = content[relation][linkText];
-            link.setAttribute('onclick', `${functionName}('${content[relation][links]}');`);
-            
-            p.appendChild(link);
-
-        dataDiv.appendChild(p);
+            linksDiv.appendChild(link);
         }
     }
 
@@ -209,7 +402,7 @@ function generateResultBody(uuid, content, keys = [], map, {
         body.appendChild(statusDiv);
     }
 
-    if (permissions) {
+    /*if (permissions) {
         const permissionsDiv = document.createElement('div');
         permissionsDiv.setAttribute('class', 'result-permissions');
 
@@ -219,7 +412,7 @@ function generateResultBody(uuid, content, keys = [], map, {
 
             p.innerText = 'Sin permisos asignados';
 
-            commentsDiv.appendChild(p);
+            permissionsDiv.appendChild(p);
         }
 
         for (const p of content.permissions) {
@@ -232,7 +425,7 @@ function generateResultBody(uuid, content, keys = [], map, {
         }
 
         body.appendChild(permissionsDiv);
-    }
+    }*/
 
     if (comments) {
         const commentsDiv = document.createElement('div');
@@ -273,14 +466,16 @@ function generateResultBody(uuid, content, keys = [], map, {
 function createOficioResult(obj, uuid, invoice) {
     const result = document.createElement('div');
 
-    const top = generateResultTop(uuid, invoice, obj.file, {
+    const top = generateResultTop(uuid, invoice, {
         relationFlag: obj.response_required,
         useAccomplishedStatus: true,
         accomplishedStatus: obj.accomplished
     });
-    const body = generateResultBody(uuid, obj, ['true_invoice', 'name', 'subject', 'reception_date', 'deadline'], OFICIO_MAP, {
+    const body = generateResultBody(uuid, obj, ['true_invoice', 'name', 'subject', 'reception_date', 'deadline', 'file'], OFICIO_MAP, {
         hasRelation: obj.response_required,
-        relation: 'emitted_oficio'
+        relation: 'emitted_oficio',
+        updateURL: `/api/oficio/in/${uuid}`,
+        file: obj.file
     });
 
     result.appendChild(top);
@@ -292,10 +487,10 @@ function createOficioResult(obj, uuid, invoice) {
 function createEmittedResult(obj, uuid, invoice) {
     const result = document.createElement('div');
 
-    const top = generateResultTop(uuid, invoice, obj.file, {
+    const top = generateResultTop(uuid, invoice, {
         relationFlag: obj.is_response
     });
-    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date'], EMITTED_MAP, { comments: false, status: false, layout: 'emitted', hasRelation: true, relation: 'oficio' });
+    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date', 'file', 'oficio_uuid'], EMITTED_MAP, { comments: false, status: false, layout: 'emitted', hasRelation: true, relation: 'oficio_uuid', updateURL: `/api/oficio/emitted/${uuid}`,  file: obj.file});
 
     result.appendChild(top);
     result.appendChild(body);
@@ -307,7 +502,7 @@ function createUserResult(obj, uuid, invoice) {
     const result = document.createElement('div');
 
     const top = generateResultTop(uuid, invoice);
-    const body = generateResultBody(uuid, obj, ['name', 'username', 'group', 'role'], USER_MAP, { comments: false, status: false, permissions: true, layout: 'users' });
+    const body = generateResultBody(uuid, obj, ['name', 'username', 'group_id', 'role_id', 'permissions'], USER_MAP, { comments: false, status: false, layout: 'users', updateURL: `/api/user/${uuid}`, bodyType: 'json' });
 
     result.appendChild(top);
     result.appendChild(body);

@@ -19,7 +19,7 @@ export async function requestAllUsers() {
 }
 
 export async function requestUsersFiltered(filters) {
-    const validatedFilters = await userUtils.filterBuilder(filters)
+    const validatedFilters = await userUtils.filterBuilder(filters);
 
     const users = await userRepo.findUsersFiltered(validatedFilters);
 
@@ -99,6 +99,14 @@ export async function requestUserUpdate(user_id, name, password, group, role, pe
 
     if (role && !await acValidations.validateRole(role)) {
         throw new ValidationError("Solicitud fallida debido a rol invalido.");
+    }
+
+    if(typeof permissions === 'string') {
+        try {
+            permissions = JSON.parse(permissions);
+        } catch (error) {
+            throw new ValidationError("Solicitud fallida debido a permisos inválidos");
+        }
     }
 
     if (permissions && !await acValidations.validatePermissions(permissions)) {

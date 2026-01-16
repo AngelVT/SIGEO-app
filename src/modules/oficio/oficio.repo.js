@@ -431,7 +431,7 @@ export async function createEmittedOficio(emitted_of_invoice, invoice, year, emi
     return generateSafeEmittedOficio(newOficio);
 }
 
-export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, is_response, oficio_id, transaction) {
+export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, position, subject, reception_date, oficio_id, transaction) {
     const oficio = await OficioEmitted.findOne({
         where: {
             emitted_of_uuid
@@ -446,8 +446,7 @@ export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, 
         position,
         subject,
         reception_date,
-        is_response,
-        oficio_id: is_response ? oficio_id : null
+        oficio_id: oficio_id ? oficio_id : null
     });
 
     if (!oficio) return null;

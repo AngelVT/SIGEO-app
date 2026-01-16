@@ -40,10 +40,10 @@ export const createUser = requestHandler(async (req, res) => {
 });
 
 export const updateUser = requestHandler(async (req, res) => {
-    const { name, password, group, role, permissions } = req.body;
+    const { name, password, group_id, role_id, permissions } = req.body;
     const { user_id } = req.params;
 
-    const response = await userService.requestUserUpdate(user_id, name, password, group, role, permissions);
+    const response = await userService.requestUserUpdate(user_id, name, password, group_id, role_id, permissions);
 
     res.status(200).json(response);
 
