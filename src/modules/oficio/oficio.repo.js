@@ -4,6 +4,7 @@ import { User } from "../users/models/user.model.js";
 import { OficioEmitted } from "./models/emitted-oficio.model.js";
 import { Group } from "../users/models/groups.model.js";
 import { Op } from "sequelize";
+import ValidationError from "../../errors/ValidationError.js";
 
 const OFICIO_MODELS = [
     {
@@ -315,10 +316,15 @@ export async function closeOficio(oficio_uuid, user_id, comment_txt) {
     const oficio = await Oficio.findOne({
         where: {
             oficio_uuid
-        }
+        },
+        include: OFICIO_MODELS
     });
 
     if (!oficio) return null;
+
+    if (oficio.accomplished) throw new ValidationError('El oficio ya ha sido cerrado.');
+
+    if (oficio.response_required && !oficio.emitted_oficio) throw new ValidationError('El oficio no puede cerrarse debido a que requiere una respuesta y aun no se le ha asignado un oficio de respuesta.');
 
     await oficio.update({
         accomplished: true

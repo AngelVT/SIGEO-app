@@ -243,7 +243,8 @@ function generateResultBody(uuid, content, keys = [], map, {
     status = true, 
     //permissions = false, 
     layout = 'oficio', 
-    hasRelation = false, 
+    hasRelation = false,
+    closeable = false,
     relation = '',
     updateURL = '/home',
     bodyType = 'form-data',
@@ -267,6 +268,17 @@ function generateResultBody(uuid, content, keys = [], map, {
         fileLink.href = file;
 
         linksDiv.appendChild(fileLink);
+    }
+
+    if(closeable) {
+        const closeBtn = document.createElement('a');
+
+        linksDiv.setAttribute('class', 'links');
+        closeBtn.setAttribute('class', 'bi-folder-check');
+
+        closeBtn.setAttribute('onclick', `closeOficio('${uuid}');`);
+
+        linksDiv.appendChild(closeBtn);
     }
 
     body.appendChild(linksDiv);
@@ -402,34 +414,18 @@ function generateResultBody(uuid, content, keys = [], map, {
         body.appendChild(statusDiv);
     }
 
-    /*if (permissions) {
-        const permissionsDiv = document.createElement('div');
-        permissionsDiv.setAttribute('class', 'result-permissions');
-
-        if (content.permissions.length === 0) {
-            const p = document.createElement('p');
-            p.setAttribute('class', 'no-comment')
-
-            p.innerText = 'Sin permisos asignados';
-
-            permissionsDiv.appendChild(p);
-        }
-
-        for (const p of content.permissions) {
-            const permission = document.createElement('p');
-            permission.setAttribute('class', 'bi-list-check permission');
-
-            permission.innerText = ` ${p.permission}`;
-
-            permissionsDiv.appendChild(permission);
-        }
-
-        body.appendChild(permissionsDiv);
-    }*/
-
     if (comments) {
-        const commentsDiv = document.createElement('div');
+        const commentsDiv = document.createElement('section');
         commentsDiv.setAttribute('class', 'result-comments');
+
+        const commentContainer = document.createElement('div');
+        commentContainer.setAttribute('id', `comments_${uuid}`);
+
+        commentsDiv.appendChild(commentContainer);
+
+        const commentForm = document.createElement('form');
+        commentForm.setAttribute('uuid', `${uuid}`);
+        commentForm.setAttribute('onsubmit', `commentOficio(event);`);
 
         if (content.comments.length === 0) {
             const p = document.createElement('p');
@@ -437,12 +433,12 @@ function generateResultBody(uuid, content, keys = [], map, {
 
             p.innerText = 'Sin comentarios';
 
-            commentsDiv.appendChild(p);
+            commentContainer.appendChild(p);
         }
 
         for (const c of content.comments) {
             const comment = document.createElement('article');
-            comment.setAttribute('class', 'comment')
+            comment.setAttribute('class', 'comment');
 
             comment.innerHTML = `
             <header>
@@ -454,8 +450,15 @@ function generateResultBody(uuid, content, keys = [], map, {
             </section>
             `
 
-            commentsDiv.appendChild(comment);
+            commentContainer.appendChild(comment);
         }
+
+        commentForm.innerHTML = `
+        <textarea name="comment" required></textarea>
+        <button class="bi-chat-dots" type="submit"></button>
+        `;
+
+        commentsDiv.appendChild(commentForm);
 
         body.appendChild(commentsDiv);
     }
@@ -475,7 +478,8 @@ function createOficioResult(obj, uuid, invoice) {
         hasRelation: obj.response_required,
         relation: 'emitted_oficio',
         updateURL: `/api/oficio/in/${uuid}`,
-        file: obj.file
+        file: obj.file,
+        closeable: true
     });
 
     result.appendChild(top);

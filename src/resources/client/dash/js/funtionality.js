@@ -248,6 +248,48 @@ async function getOficioUUID(uuid) {
     resultContainer.appendChild(result);
 }
 
+async function closeOficio(uuid) {
+    const confirmClosing = confirm('Seguro que quieres cerrar este oficio?, esto hará que ya no sea posible modificar el oficio.');
+
+    if(!confirmClosing) {
+        return
+    }
+
+    const closureComment = prompt('Describe el motivo para cerrar este oficio: ');
+
+    if (!closureComment) {
+        alert('Comentario invalido');
+        return;
+    }
+
+    const res = await fetch(`/api/oficio/in/close/${uuid}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            comment: closureComment
+        })
+    });
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        alert(response.msg);
+        return;
+    }
+
+    const { oficio } = response;
+
+    resultContainer.innerHTML = '';
+    resultContainer.scrollTop = resultContainer.scrollHeight;
+
+    const result = createOficioResult(oficio, oficio.oficio_uuid, oficio.oficio_invoice);
+
+    resultContainer.appendChild(result);
+}
+
 oficioRegForm.addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -446,8 +488,8 @@ const areArraysEqual = (arr1, arr2) => {
 async function updateResult(e) {
     e.preventDefault();
 
-    const url = e.target.action;
     const form = e.target;
+    const url = form.action;
     const originalInput = form.querySelector('input[type=hidden]');
 
     const bodyType = form.getAttribute('body');
@@ -572,4 +614,54 @@ async function updateResult(e) {
         originalInput.value = JSON.stringify(updateOriginalInput(user, originalData));
         return;
     }
-} 
+}
+
+async function commentOficio(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const uuid = form.getAttribute('uuid');
+
+    const data = Object.fromEntries(new FormData(form));
+
+    const res = await fetch(`/api/oficio/in/comment/${uuid}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        alert(response.msg);
+        return;
+    }
+
+    const { comment } = response;
+
+    const commentContainer = document.getElementById(`comments_${uuid}`);
+
+    if(commentContainer.querySelector('p[class=no-comment]')) {
+        commentContainer.innerHTML = '';
+    }
+
+    const newComment = document.createElement('article');
+    newComment.setAttribute('class', 'comment');
+
+    newComment.innerHTML = `
+    <header>
+        <strong class="bi-person-circle"> ${comment.user.name} (${comment.user.username})</strong>
+        <p>${new Date(comment.createdAt).toLocaleString()}</p>
+    </header>
+    <section>
+        <p>${comment.comment_txt}</p>
+    </section>
+    `
+
+    commentContainer.appendChild(newComment);
+
+    form.querySelector('textarea').value = '';
+}

@@ -185,7 +185,7 @@ nav > h1 {
 .result-body {
     border: 1px solid var(--primary);
     border-top: none;
-    border-radius: 0 0 0 15px;
+    border-radius: 0 0 15px 15px;
 
     display: flex;
     flex-wrap: wrap;
@@ -202,6 +202,7 @@ nav > h1 {
     color: var(--primary);
     transition: all 0.1s ease-in-out;
     font-size: 32px;
+    cursor: pointer;
 }
 
 .result-body .links > a:hover {
@@ -289,21 +290,50 @@ nav > h1 {
     border-left: 1px solid var(--primary);
     padding: 10px;
     display: flex;
-    align-items: center;
+    gap: 5px;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .result-comments {
     width: 100%;
     border-top: 1px solid var(--primary);
     padding: 10px;
+}
 
+.result-comments div {
     display: flex;
     flex-direction: column;
-    gap: 10px;
 
     max-height: 350px;
     overflow-y: scroll;
     scrollbar-width: thin;
+}
+
+.result-comments > form {
+    width: 100%;
+    display: flex;
+}
+
+.result-comments > form > textarea {
+    width: 90%;
+    resize: vertical;
+    min-height: 46px;
+    max-height: 280px;
+    padding: 5px;
+}
+
+.result-comments > form > button {
+    width: 10%;
+    cursor: pointer;
+    font-size: large;
+    color: var(--white);
+    background-color: var(--complementary);
+    border: none;
+}
+
+.result-comments > form > button:hover {
+    background-color: var(--primary);
 }
 
 .result-permissions {
@@ -347,12 +377,14 @@ nav > h1 {
 
 .no-comment {
     text-align: center;
+    margin: 10px;
     color: var(--complementary_alpha);
 }
 
 .comment {
     border-radius: 10px;
     border: 1px solid var(--secondary);
+    margin-bottom: 10px;
 }
 
 .comment header {
@@ -384,6 +416,7 @@ nav > h1 {
 .panel-background form {
     border-radius: 15px;
     border: 1px solid var(--primary);
+    background-color: var(--complementary);
     padding: 10px 20px;
     
     display:flex;
