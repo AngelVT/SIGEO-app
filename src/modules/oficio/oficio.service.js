@@ -70,7 +70,7 @@ export async function requestAllOficios() {
     const oficios = await oficioRepo.findAllOficios();
 
     if (!oficios || oficios.length === 0) {
-        throw new ResourceError(`No se encontraron oficios pendientes.`);
+        throw new ResourceError(`No se encontraron oficios.`);
     }
 
     return {
@@ -82,7 +82,7 @@ export async function requestAllGroupOficios(userGroup) {
     const oficios = await oficioRepo.findAllGroupOficios(userGroup);
 
     if (!oficios || oficios.length === 0) {
-        throw new ResourceError(`No se encontraron oficios pendientes.`);
+        throw new ResourceError(`No se encontraron oficios.`);
     }
 
     return {
