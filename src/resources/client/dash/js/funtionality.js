@@ -65,6 +65,10 @@ btnAllOficio.addEventListener('click', async () => {
     resultContainer.scrollTop = resultContainer.scrollHeight;
 
     for (const o of oficios) {
+        o.emitted_of_invoice = o.emitted_oficio?.emitted_of_invoice;
+        o.emitted_of_uuid = o.emitted_oficio?.emitted_of_uuid;
+
+
         const result = createOficioResult(o, o.oficio_uuid, o.oficio_invoice);
 
         resultContainer.appendChild(result);
@@ -152,6 +156,9 @@ oficioSearchForm.addEventListener('submit', async e => {
     resultContainer.scrollTop = resultContainer.scrollHeight;
 
     for (const o of oficios) {
+        o.emitted_of_invoice = o.emitted_oficio?.emitted_of_invoice;
+        o.emitted_of_uuid = o.emitted_oficio?.emitted_of_uuid;
+
         const result = createOficioResult(o, o.oficio_uuid, o.oficio_invoice);
 
         resultContainer.appendChild(result);
@@ -242,6 +249,9 @@ async function getOficioUUID(uuid) {
     
     resultContainer.innerHTML = '';
     resultContainer.scrollTop = resultContainer.scrollHeight;
+
+    oficio.emitted_of_invoice = oficio.emitted_oficio?.emitted_of_invoice;
+    oficio.emitted_of_uuid = oficio.emitted_oficio?.emitted_of_uuid;
 
     const result = createOficioResult(oficio, oficio.oficio_uuid, oficio.oficio_invoice);
 
@@ -377,8 +387,8 @@ async function getEmittedUUID(uuid) {
     resultContainer.innerHTML = '';
     resultContainer.scrollTop = resultContainer.scrollHeight;
 
-    emittedOficio.oficio_uuid = eo.oficio?.oficio_uuid;
-    emittedOficio.oficio_text = eo.oficio?.oficio_invoice;
+    emittedOficio.oficio_uuid = emittedOficio.oficio?.oficio_uuid;
+    emittedOficio.oficio_text = emittedOficio.oficio?.oficio_invoice;
 
     const result = createEmittedResult(emittedOficio, emittedOficio.emitted_of_uuid, emittedOficio.emitted_of_invoice);
 
