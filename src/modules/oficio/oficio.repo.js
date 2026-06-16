@@ -452,7 +452,7 @@ export async function updateEmittedOficio(emitted_of_uuid, emission_date, name, 
         position,
         subject,
         reception_date,
-        oficio_id: oficio_id ? oficio_id : null
+        oficio_id: oficio_id ? oficio_id : undefined
     });
 
     if (!oficio) return null;

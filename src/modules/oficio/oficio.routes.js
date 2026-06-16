@@ -94,7 +94,7 @@ router.post('/emitted', [
     verifyGroup(['DG', 'SYSTEM']),
     verifyRole(['system', 'admin']),
     verifyPermission(['oficio:create','oficio:manage']),
-    upload.single('oficio_pdf')
+    upload.fields([{ name: 'oficio_pdf', maxCount: 1 }, { name: 'evidence_pdf', maxCount: 1 }])
 ], oficioControl.createEmittedOficio);
 
 router.patch('/emitted/:emitted_of_uuid', [
@@ -102,7 +102,7 @@ router.patch('/emitted/:emitted_of_uuid', [
     verifyGroup(['DG', 'SYSTEM']),
     verifyRole(['system', 'admin']),
     verifyPermission(['oficio:update','oficio:manage']),
-    upload.single('oficio_pdf')
+    upload.fields([{ name: 'oficio_pdf', maxCount: 1 }, { name: 'evidence_pdf', maxCount: 1 }])
 ], oficioControl.updateEmittedOficio);
 
 export default router;

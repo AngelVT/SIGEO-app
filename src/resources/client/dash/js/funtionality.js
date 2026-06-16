@@ -38,6 +38,8 @@ async function updateUnansweredList() {
         text: 'Seleccionar ...'
     }]
 
+    if(!responseOptions) return;
+
     for (const ro of responseOptions) {
         EMITTED_MAP.oficio_uuid.options.push({
             value: ro.oficio_uuid,

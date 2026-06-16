@@ -54,7 +54,13 @@ export const OficioEmitted = pool.define(
         file: {
             type: DataTypes.VIRTUAL,
             get() {
-                return `/oficios/emitidos/${this.emitted_of_invoice}.pdf`
+                return `/oficios/emitidos/${this.emitted_of_invoice}/oficio.pdf`
+            }
+        },
+        file_evidence: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `/oficios/emitidos/${this.emitted_of_invoice}/evidencia.pdf`
             }
         }
     },

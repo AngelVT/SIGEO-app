@@ -381,7 +381,7 @@ export async function requestEmittedFiltered(filters) {
 }
 
 
-export async function requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid, file) {
+export async function requestEmittedOficioCreation(emission_date, name, position, subject, reception_date, is_response, oficio_uuid, files) {
     if (typeof is_response === 'undefined') {
         throw new ValidationError("No se pudo crear el oficio debido a información faltante.");
     }
@@ -408,8 +408,15 @@ export async function requestEmittedOficioCreation(emission_date, name, position
         reception_date = undefined;
     }
 
-    if (file && !validatePFFile(file)) {
-        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
+    const oficioFile = files?.['oficio_pdf']?.[0];
+    const evidenceFile = files?.['evidence_pdf']?.[0];
+
+    if (oficioFile && !validatePFFile(oficioFile)) {
+        throw new ValidationError(`Solicitud fallida, el archivo de oficio proporcionado no es un PDF valido o pesa mas de 3MB..`);
+    }
+
+    if (evidenceFile && !validatePFFile(evidenceFile)) {
+        throw new ValidationError(`Solicitud fallida, el archivo de evidencia proporcionado no es un PDF valido o pesa mas de 3MB..`);
     }
 
     let target_oficio_id;
@@ -453,10 +460,16 @@ export async function requestEmittedOficioCreation(emission_date, name, position
                 throw new ValidationError(`Solicitud fallida, el folio ${emitted_of_invoice} ya existe.`);
             }
 
-            if (file) {
-                file.originalname = `${emitted_of_invoice}.pdf`
+            if (oficioFile) {
+                oficioFile.originalname = `oficio.pdf`
 
-                filePath = await saveFile(`oficios/emitidos`, file);
+                filePath = await saveFile(`oficios/emitidos/${emitted_of_invoice}`, oficioFile);
+            }
+
+            if (evidenceFile) {
+                evidenceFile.originalname = `evidencia.pdf`
+
+                filePath = await saveFile(`oficios/emitidos/${emitted_of_invoice}`, evidenceFile);
             }
 
             return emittedOficioRecord;
@@ -479,12 +492,15 @@ export async function requestEmittedOficioCreation(emission_date, name, position
     }
 }
 
-export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, oficio_uuid, file) {
+export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date, name, position, subject, reception_date, oficio_uuid, files) {
     if (!isUuid(emitted_of_uuid)) {
         throw new ValidationError('Solicitud fallida debido a id invalido.');
     }
 
-    if(!emission_date && !name && !position && !subject && !reception_date && !oficio_uuid && !file) {
+    const oficioFile = files?.['oficio_pdf']?.[0];
+    const evidenceFile = files?.['evidence_pdf']?.[0];
+
+    if(!emission_date && !name && !position && !subject && !reception_date && !oficio_uuid && !oficioFile && !evidenceFile) {
         throw new ValidationError("No se pudo actualizar el oficio debido a información faltante");
     }
 
@@ -496,8 +512,12 @@ export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date,
         throw new ValidationError("Solicitud invalidad debido a fechas invalidas, procura seguir el formato AAAA-MM-DD");
     }
 
-    if (file && !validatePFFile(file)) {
-        throw new ValidationError(`Solicitud fallida, el archivo proporcionado no es un PDF valido.`);
+    if (oficioFile && !validatePFFile(oficioFile)) {
+        throw new ValidationError(`Solicitud fallida, el archivo de oficio proporcionado no es un PDF valido o pesa mas de 3MB.`);
+    }
+
+    if (evidenceFile && !validatePFFile(evidenceFile)) {
+        throw new ValidationError(`Solicitud fallida, el archivo de evidencia proporcionado no es un PDF valido o pesa mas de 3MB.`);
     }
 
     /*let isResponse;
@@ -559,10 +579,16 @@ export async function requestEmittedOficioUpdate(emitted_of_uuid, emission_date,
                 throw new ValidationError(`Solicitud fallida, el folio solicitado no existe.`);
             }
 
-            if (file) {
-                file.originalname = `${emittedOficioRecord.emitted_of_invoice}.pdf`
+            if (oficioFile) {
+                oficioFile.originalname = `oficio.pdf`
 
-                filePath = await saveFile(`oficios/emitidos`, file);
+                filePath = await saveFile(`oficios/emitidos/${emittedOficioRecord.emitted_of_invoice}`, oficioFile);
+            }
+
+            if (evidenceFile) {
+                evidenceFile.originalname = `evidencia.pdf`
+
+                filePath = await saveFile(`oficios/emitidos/${emittedOficioRecord.emitted_of_invoice}`, evidenceFile);
             }
 
             return emittedOficioRecord;

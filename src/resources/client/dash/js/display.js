@@ -69,10 +69,16 @@ const EMITTED_MAP = {
         functionName: 'getOficioUUID',
     },
     file: {
-        text: 'Archivo PDF',
+        text: 'Oficio PDF',
         type: 'file',
         accept: '.pdf',
         name: 'oficio_pdf'
+    },
+    file_evidence: {
+        text: 'Evidencia PDF',
+        type: 'file',
+        accept: '.pdf',
+        name: 'evidence_pdf'
     }
 }
 
@@ -248,7 +254,8 @@ function generateResultBody(uuid, content, keys = [], map, {
     relation = '',
     updateURL = '/home',
     bodyType = 'form-data',
-    file = undefined
+    file = undefined,
+    evidence_file = undefined
 } = {}) {
     const body = document.createElement('section');
     const originalData = {};
@@ -266,6 +273,18 @@ function generateResultBody(uuid, content, keys = [], map, {
 
         fileLink.target = '_blank';
         fileLink.href = file;
+
+        linksDiv.appendChild(fileLink);
+    }
+
+    if (evidence_file) {
+        const fileLink = document.createElement('a');
+
+        linksDiv.setAttribute('class', 'links');
+        fileLink.setAttribute('class', 'bi-file-earmark-medical');
+
+        fileLink.target = '_blank';
+        fileLink.href = evidence_file;
 
         linksDiv.appendChild(fileLink);
     }
@@ -494,7 +513,16 @@ function createEmittedResult(obj, uuid, invoice) {
     const top = generateResultTop(uuid, invoice, {
         relationFlag: obj.is_response
     });
-    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date', 'file', 'oficio_uuid'], EMITTED_MAP, { comments: false, status: false, layout: 'emitted', hasRelation: true, relation: 'oficio_uuid', updateURL: `/api/oficio/emitted/${uuid}`,  file: obj.file});
+    const body = generateResultBody(uuid, obj, ['name', 'subject', 'position', 'emission_date', 'reception_date', 'file', 'oficio_uuid', 'file_evidence'], EMITTED_MAP, {
+        comments: false,
+        status: false,
+        layout: 'emitted',
+        hasRelation: obj.is_response,
+        relation: 'oficio_uuid',
+        updateURL: `/api/oficio/emitted/${uuid}`,
+        file: obj.file,
+        evidence_file: obj.file_evidence
+    });
 
     result.appendChild(top);
     result.appendChild(body);

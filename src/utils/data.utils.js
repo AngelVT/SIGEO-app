@@ -28,17 +28,29 @@ export function parseBool(value) {
 }
 
 export async function validatePFFile(file) {
-    if (file.mimetype !== 'application/pdf') {
+    const { mimetype, buffer, size, originalname } = file;
+
+    if (mimetype !== 'application/pdf') {
         return false;
     }
 
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = path.extname(originalname).toLowerCase();
     if (ext !== '.pdf') {
         return false;
     }
 
-    const detectedType = await fileTypeFromBuffer(file.buffer);
+    const detectedType = await fileTypeFromBuffer(buffer);
+
+    if (detectedType.ext !== 'pdf') {
+        return false;
+    }
+
     if (!detectedType || detectedType.mime !== 'application/pdf') {
+        return false;
+    }
+
+    const maxSize = 3 * 1024 * 1024;
+    if(size > maxSize) {
         return false;
     }
 
